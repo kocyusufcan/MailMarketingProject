@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\MailMarketing.WebUI.props" />
-</Project>
