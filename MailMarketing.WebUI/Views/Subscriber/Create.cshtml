@@ -1,0 +1,65 @@
+@model MailMarketing.Entity.Subscriber
+
+@{
+    ViewData["Title"] = "Yeni Abone Ekle";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-plus"></i> Yeni Abone Kaydı</h4>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-dark fw-bold">Ad</label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Örn: Yusufcan" required />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-dark fw-bold">Soyad</label>
+                                <input asp-for="LastName" class="form-control" placeholder="Örn: Koç" required />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-dark fw-bold">E-Posta Adresi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="yusufcan@akdeniz.edu.tr" required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        @* Varsayılan değerler *@
+                        <input type="hidden" asp-for="IsActive" value="true" />
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg shadow-sm">
+                                <i class="fas fa-save"></i> Aboneyi Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Vazgeç
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">Eklenen aboneler otomatik olarak aktif durumda kaydedilir.</small>
+            </div>
+        </div>
+    </div>
+</div>

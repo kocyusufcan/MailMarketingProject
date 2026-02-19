@@ -1,0 +1,237 @@
+@model MailMarketing.Entity.User
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Yeni Kayıt";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i> Mail Pazarlama - Yeni Kayıt</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger border-0 shadow-sm">
+                            <i class="fas fa-exclamation-circle me-2"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    @* --- ADIM 1: KULLANICI BİLGİLERİ VE HESAP TÜRÜ --- *@
+                    @if (ViewBag.Step == null || ViewBag.Step == 1)
+                    {
+                        <p class="text-muted small text-center mb-4">Sisteme kayıt olmak için bilgilerinizi eksiksiz doldurun.</p>
+                        <form asp-action="Register" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Ad</label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Adınız" required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Soyad</label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Soyadınız" required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">E-Posta Adresi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="Örn: ad@soyad.com" required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3 p-3 bg-light rounded border">
+                                <label class="form-label fw-bold"><i class="fas fa-user-tag me-1"></i> Hesap Türü</label>
+                                <div class="d-flex gap-4 mt-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="RoleType" id="roleAdmin" value="Admin" checked onchange="toggleAdminCode(false)">
+                                        <label class="form-check-label fw-bold" for="roleAdmin">
+                                            Admin <small class="d-block text-muted fw-normal">Kendi panelimi yöneteceğim.</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="RoleType" id="roleUser" value="User" onchange="toggleAdminCode(true)">
+                                        <label class="form-check-label fw-bold" for="roleUser">
+                                            Kullanıcı <small class="d-block text-muted fw-normal">Bir admine bağlı çalışacağım.</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="adminCodeArea" class="mb-4 p-3 border border-danger rounded bg-danger bg-opacity-10" style="display: none;">
+                                <label class="form-label fw-bold text-danger"><i class="fas fa-key me-1"></i> Admin Davet Kodu</label>
+                                <input type="text" name="InvitedByCode" id="invitationInput" class="form-control border-danger" placeholder="Örn: MM-123456" />
+                                <small class="text-danger mt-1 d-block">Bağlı olduğunuz yöneticiden bu kodu almalısınız.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Parola</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="********" required />
+                                </div>
+                                <small class="text-muted">En az 8 karakter olmalıdır.</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Parola Tekrar</label>
+                                <input name="PasswordConfirm" type="password" class="form-control" placeholder="********" required />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i> Kayıt Ol ve Kod Gönder
+                            </button>
+                        </form>
+                    }
+
+                    @* --- ADIM 2: E-POSTA DOĞRULAMA (ZAMAN AŞIMI DESTEKLİ) --- *@
+                    else if (ViewBag.Step == 2)
+                    {
+                        <div class="text-center">
+                            <div class="alert alert-info border-0 shadow-sm mb-4">
+                                <i class="fas fa-envelope-open-text fa-2x mb-3 d-block"></i>
+                                <strong>@ViewBag.Email</strong> adresine bir doğrulama kodu gönderdik.
+                            </div>
+                            
+                            <form asp-action="VerifyRegister" method="post" id="verifyForm">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">6 Haneli Doğrulama Kodu</label>
+                                    <input type="text" name="code" id="verificationCodeInput" class="form-control form-control-lg text-center fw-bold" 
+                                           placeholder="000000" maxlength="6" pattern="\d{6}" required>
+                                </div>
+                                <button type="submit" id="verifyBtn" class="btn btn-success w-100 py-2 shadow-sm fw-bold mb-3">
+                                    <i class="fas fa-check-double me-2"></i> Hesabı Doğrula ve Tamamla
+                                </button>
+                            </form>
+
+                            @* 🕒 GERİ SAYIM ALANI *@
+                            <div class="p-3 bg-light rounded shadow-sm border">
+                                <div id="timer-container">
+                                    <p class="small text-muted mb-0" id="timer-text">
+                                        Yeni kod alabilmek için kalan süre: <br>
+                                        <span id="timer" class="fs-4 fw-bold text-danger">60</span> saniye
+                                    </p>
+                                </div>
+                                <div id="resend-area" style="display:none;">
+                                    <p class="text-danger fw-bold small mb-2"><i class="fas fa-clock me-1"></i> Kodun süresi doldu!</p>
+                                    <button id="resend-btn" type="button" class="btn btn-outline-primary btn-sm fw-bold" onclick="resendCode()">
+                                        <i class="fas fa-sync-alt me-1"></i> Yeni Kod Gönder
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <a asp-action="Register" class="text-decoration-none small text-secondary">
+                                    <i class="fas fa-undo me-1"></i> Bilgileri Düzenle
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="text-center mt-4 border-top pt-3">
+                        <p class="small text-muted mb-2">Zaten hesabın var mı? <a asp-action="Login" class="text-decoration-none fw-bold">Giriş Yap</a></p>
+                        <a href="/" class="text-secondary text-decoration-none small">
+                            <i class="fas fa-home me-1"></i> Vazgeç ve Anasayfaya Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- HESAP TÜRÜ KONTROLÜ ---
+        function toggleAdminCode(show) {
+            const area = document.getElementById('adminCodeArea');
+            const input = document.getElementById('invitationInput');
+            
+            if (show) {
+                area.style.display = 'block';
+                input.setAttribute('required', 'required');
+                input.focus();
+            } else {
+                area.style.display = 'none';
+                input.removeAttribute('required');
+                input.value = ''; 
+            }
+        }
+
+        // --- SAYAÇ VE TEKRAR GÖNDERME MANTIĞI ---
+        let timeLeft = 60;
+        let countdown;
+
+        function startTimer() {
+            clearInterval(countdown);
+            timeLeft = 60;
+            
+            const timerDisplay = document.getElementById('timer');
+            const timerContainer = document.getElementById('timer-container');
+            const resendArea = document.getElementById('resend-area');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const codeInput = document.getElementById('verificationCodeInput');
+
+            // Başlangıç ayarları
+            resendArea.style.display = 'none';
+            timerContainer.style.display = 'block';
+            verifyBtn.disabled = false;
+            codeInput.disabled = false;
+            timerDisplay.innerText = timeLeft;
+
+            countdown = setInterval(function() {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    // Süre bittiğinde yapılacaklar
+                    timerContainer.style.display = 'none';
+                    resendArea.style.display = 'block';
+                    verifyBtn.disabled = true; // Doğrulama butonunu kapat
+                    codeInput.disabled = true; // Girişi engelle
+                }
+            }, 1000);
+        }
+
+        // --- AJAX İLE YENİ KOD ---
+        function resendCode() {
+            const resendBtn = document.getElementById('resend-btn');
+            const resendArea = document.getElementById('resend-area');
+            
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Gönderiliyor...';
+
+            fetch('/Account/ResendActivationCode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Yeni doğrulama kodu gönderildi! 🚀");
+                    startTimer(); // Sayacı sıfırla ve her şeyi aç
+                    resendBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Yeni Kod Gönder';
+                } else {
+                    alert("Hata: " + data.message);
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Yeni Kod Gönder';
+                }
+            })
+            .catch(error => {
+                alert("Bağlantı hatası oluştu!");
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Yeni Kod Gönder';
+            });
+        }
+
+        // Step 2 yüklendiğinde sayacı çalıştır
+        if (document.getElementById('timer')) {
+            startTimer();
+        }
+    </script>
+}

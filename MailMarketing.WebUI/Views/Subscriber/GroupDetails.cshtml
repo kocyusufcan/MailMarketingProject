@@ -1,0 +1,311 @@
+@using MailMarketing.Entity
+@model List<Subscriber>
+@{
+    var group = ViewBag.Group as SubscriberGroup;
+    ViewData["Title"] = group?.GroupName + " İçeriği";
+}
+
+<style>
+    /* 🔵 SEÇİLEN SATIR STİLİ */
+    tbody tr { cursor: pointer; transition: all 0.2s; }
+    tbody tr.is-selected {
+        background-color: #f0f7ff !important;
+        box-shadow: inset 4px 0 0 0 #6366f1;
+    }
+    tbody tr a, tbody tr button, tbody tr .badge { cursor: default; }
+    .pagination .page-link { transition: all 0.2s; }
+    .pagination .page-item.active .page-link { background-color: #6366f1 !important; color: white !important; }
+</style>
+
+<div class="container mt-4">
+    @* --- NAVİGASYON --- *@
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Subscriber/Groups" class="text-decoration-none text-muted"><i class="fas fa-folder me-1"></i>Klasörler</a></li>
+        <li class="breadcrumb-item active fw-bold text-primary">@group?.GroupName</li>
+      </ol>
+    </nav>
+
+    @* --- ÜST BAŞLIK VE AKSİYONLAR --- *@
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-0"><i class="fas fa-folder-open text-primary me-2"></i>@group?.GroupName</h2>
+            <p class="text-muted small mb-0">Bu klasörde toplam <strong>@ViewBag.TotalRecords</strong> abone bulunuyor.</p>
+        </div>
+        <div class="d-flex gap-2">
+            @* TOPLU İŞLEM BUTONU *@
+            <button type="button" id="btnBulkRemoveFromGroup" class="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm" style="display:none;" onclick="bulkRemoveFromGroup()">
+                <i class="fas fa-user-minus me-1"></i> Seçilenleri Çıkar (<span id="selectedCount">0</span>)
+            </button>
+
+            <a href="/Subscriber/AddMembers?groupId=@group?.Id" class="btn btn-primary rounded-pill shadow-sm px-4 fw-bold">
+                <i class="fas fa-user-plus me-1"></i> Yeni Abone Ekle
+            </a>
+        </div>
+    </div>
+
+    @* --- TABLO KARTI --- *@
+    <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 20px;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="membersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" width="40"><input type="checkbox" id="selectAll" class="form-check-input"></th>
+                        <th class="py-3">İsim Soyisim</th>
+                        <th>E-Posta</th>
+                        <th>Klasöre Kayıt</th>
+                        <th class="text-end pe-4">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model) {
+                        <tr data-id="@item.Id">
+                            <td class="ps-4">
+                                <input type="checkbox" name="selectedIds" value="@item.Id" class="form-check-input member-checkbox">
+                            </td>
+                            <td class="fw-bold text-dark">@item.FirstName @item.LastName</td>
+                            <td><span class="badge bg-light text-dark border fw-normal px-3 py-2">@item.Email</span></td>
+                            <td class="small text-muted">@item.CreatedDate.ToString("dd.MM.yyyy")</td>
+                            <td class="text-end pe-4">
+                                <button onclick="removeFromCurrentGroup(@item.Id, '@item.Email')" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Klasörden Çıkar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-users-slash fa-3x mb-3 d-block opacity-25"></i>
+                                Bu klasörde henüz abone bulunmuyor.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @* --- SAYFALAMA --- *@
+    @if (ViewBag.TotalPages > 1) {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center gap-1">
+                @{ int cur = ViewBag.CurrentPage; int total = ViewBag.TotalPages; }
+                <li class="page-item @(cur == 1 ? "disabled" : "")">
+                    <a class="page-link border-0 rounded-pill shadow-sm px-3" href="?groupId=@group?.Id&page=@(cur - 1)"><i class="fas fa-chevron-left small"></i></a>
+                </li>
+                @for (int i = 1; i <= total; i++) {
+                    <li class="page-item @(cur == i ? "active" : "")">
+                        <a class="page-link border-0 rounded-pill shadow-sm px-3" href="?groupId=@group?.Id&page=@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(cur == total ? "disabled" : "")">
+                    <a class="page-link border-0 rounded-pill shadow-sm px-3" href="?groupId=@group?.Id&page=@(cur + 1)"><i class="fas fa-chevron-right small"></i></a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        var selectedMemberIds = new Set();
+        // Her klasör için benzersiz anahtar ("MM_Group_78_Selection" gibi)
+        const GROUP_ID = "@group?.Id";
+        const STORAGE_KEY = `MM_Group_${GROUP_ID}_Selection`;
+
+        $(document).ready(function() {
+            // 🔥 NAVİGASYON KONTROLÜ: Klasörden çıkıp geri gelince hafızayı temizle
+            checkNavigationAndClear();
+
+            // 1. Hafızadan yükle
+            loadSelection();
+
+            // 2. Tabloyu senkronize et
+            syncCheckboxes();
+
+            // Satır tıklama ile seçme
+            $('#membersTable tbody tr').on('click', function(e) {
+                if ($(e.target).closest('button, input').length) return;
+                const checkbox = $(this).find('.member-checkbox');
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            });
+
+            // Checkbox değişim takibi
+            $(document).on('change', '.member-checkbox', function() {
+                var id = String($(this).val());
+                if (this.checked) {
+                    selectedMemberIds.add(id);
+                } else {
+                    selectedMemberIds.delete(id);
+                }
+                saveSelection();
+                updateSelectAllState();
+                updateUI();
+            });
+
+            // Tümünü seç
+            $('#selectAll').on('change', function() {
+                var isChecked = this.checked;
+                $('.member-checkbox').each(function() {
+                    $(this).prop('checked', isChecked);
+                    var id = String($(this).val());
+                    if (isChecked) selectedMemberIds.add(id);
+                    else selectedMemberIds.delete(id);
+                });
+                saveSelection();
+                updateUI();
+            });
+        });
+
+        function checkNavigationAndClear() {
+            try {
+                // Navigasyon tipini al (Reload, Back/Forward, Navigate)
+                const navEntry = performance.getEntriesByType("navigation")[0];
+                const type = navEntry ? navEntry.type : 'navigate';
+                
+                // Eğer sayfa yenilendiyse veya geri/ileri tuşuyla gelindiyse dokunma (Hafızayı koru)
+                if (type === 'reload' || type === 'back_forward') {
+                    return;
+                }
+
+                // Eğer normal bir link tıklamasıyla (navigate) gelindiyse referer kontrolü yap
+                // Referer bu sayfanın kendisi değilse (örneğin Dashboard'dan veya Gruplar listesinden geldiyse) temizle.
+                // Sayfalama linkleri aynı sayfayı referer gösterir, o yüzden sayfalama hafızayı korur.
+                const referrer = document.referrer;
+                const currentGroupCheck = "groupId=" + GROUP_ID;
+
+                // Eğer referer boşsa veya bu grup detay sayfası değilse temizle
+                // Not: 'GroupDetails' ve 'groupId=78' içermiyorsa dışarıdan gelmiştir.
+                if (!referrer || referrer.indexOf('GroupDetails') === -1 || referrer.indexOf(currentGroupCheck) === -1) {
+                    sessionStorage.removeItem(STORAGE_KEY);
+                    selectedMemberIds.clear();
+                }
+            } catch (e) {
+                console.error("Navigation check error:", e);
+            }
+        }
+
+        function loadSelection() {
+            try {
+                var stored = sessionStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    var arr = JSON.parse(stored);
+                    selectedMemberIds = new Set(arr.map(String));
+                }
+            } catch (e) {
+                console.error("Load selection error:", e);
+                selectedMemberIds = new Set();
+            }
+            updateUI();
+        }
+
+        function saveSelection() {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedMemberIds)));
+        }
+
+        function clearSelection() {
+            selectedMemberIds.clear();
+            sessionStorage.removeItem(STORAGE_KEY);
+            updateUI();
+            syncCheckboxes();
+        }
+
+        function syncCheckboxes() {
+            $('.member-checkbox').each(function() {
+                var id = String($(this).val());
+                var isSelected = selectedMemberIds.has(id);
+                $(this).prop('checked', isSelected);
+                $(this).closest('tr').toggleClass('is-selected', isSelected);
+            });
+            updateSelectAllState();
+        }
+
+        function updateSelectAllState() {
+            var total = $('.member-checkbox').length;
+            var checked = $('.member-checkbox:checked').length;
+            $('#selectAll').prop('checked', total > 0 && total === checked);
+        }
+
+        function updateUI() {
+            var count = selectedMemberIds.size;
+            
+            // Buton üzerindeki sayı
+            $('#selectedCount').text(count);
+            
+            // Buton görünürlüğü
+            $('#btnBulkRemoveFromGroup').toggle(count > 0);
+
+            // Başlık yanına badge
+            var badgeId = 'groupSelectedBadge';
+            var headerContainer = $('.fw-bold.text-dark.mb-0').parent(); // h2'nin parent div'i
+            $('#' + badgeId).remove(); // Varsa önce sil
+            $('#clearSelectionBtn').remove();
+
+            if (count > 0) {
+                 $('.fw-bold.text-dark.mb-0').append(`
+                    <span id="${badgeId}" class="badge bg-primary rounded-pill ms-3 fs-6 align-middle animate__animated animate__fadeIn">
+                        ${count} Seçili
+                    </span>
+                    <button id="clearSelectionBtn" class="btn btn-sm btn-link text-danger text-decoration-none ms-1 p-0 align-middle small" onclick="clearSelection()" title="Seçimi Temizle">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `);
+            }
+        }
+
+        // Tekli klasörden çıkarma
+        function removeFromCurrentGroup(subscriberId, email) {
+            Swal.fire({
+                title: 'Klasörden çıkarılsın mı?',
+                text: `${email} adresi bu klasörden silinecek (Abone listeden silinmez).`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Evet, Çıkar',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeRemove([String(subscriberId)]);
+                }
+            });
+        }
+
+        // Toplu klasörden çıkarma
+        function bulkRemoveFromGroup() {
+            const ids = Array.from(selectedMemberIds);
+            
+            if (ids.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen seçim yapın.' }); return; }
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: `${ids.length} adet abone bu klasörden çıkarılacak.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Evet, Hepsini Çıkar',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeRemove(ids);
+                }
+            });
+        }
+
+        // AJAX ile çıkarma işlemini yürüt
+        function executeRemove(ids) {
+            $.post('/Subscriber/RemoveFromGroup', { groupId: GROUP_ID, subscriberIds: ids }, function (res) {
+                if (res.success) {
+                    Swal.fire({ icon: 'success', title: 'Başarılı', text: 'İşlem tamamlandı.', timer: 1500, showConfirmButton: false })
+                        .then(() => {
+                            clearSelection(); // İşlem bitince temizle
+                            location.reload(); 
+                        });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Hata', text: res.message });
+                }
+            });
+        }
+    </script>
+}

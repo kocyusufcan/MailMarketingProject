@@ -1,0 +1,277 @@
+@model List<MailMarketing.Entity.Subscriber>
+@{
+    var template = (MailMarketing.Entity.Template)ViewBag.Template;
+    var groups = ViewBag.Groups as List<MailMarketing.Entity.SubscriberGroup> ?? new List<MailMarketing.Entity.SubscriberGroup>();
+    var groupMembers = ViewBag.GroupMembers as List<MailMarketing.Entity.SubscriberGroupMember> ?? new List<MailMarketing.Entity.SubscriberGroupMember>();
+    ViewData["Title"] = "Alıcı Seçimi";
+}
+
+@* --- iOS TARZI CSS --- *@
+<style>
+    body { background-color: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    
+    .ios-card {
+        background: #fff; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        overflow: hidden; border: none;
+    }
+
+    .ios-header { padding: 25px 25px 15px 25px; background: #fff; }
+    .ios-title { font-size: 1.5rem; font-weight: 700; color: #000; letter-spacing: -0.5px; }
+    .ios-badge { background: #e5e5ea; color: #007aff; font-weight: 600; font-size: 0.9rem; padding: 6px 12px; border-radius: 12px; }
+
+    .ios-search-container { background: #fff; padding: 10px 20px; border-bottom: 1px solid #e5e5ea; }
+    .ios-search-input {
+        background-color: #e3e3e8; border-radius: 12px; border: none;
+        padding: 12px 15px 12px 45px; font-size: 1rem; width: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238e8e93' class='bi bi-search' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: 15px center;
+    }
+
+    .table-ios { margin-bottom: 0; }
+    .table-ios thead { display: none; } 
+    .table-ios tbody tr td { padding: 16px 20px; border-bottom: 1px solid #e5e5ea; vertical-align: middle; }
+
+    /* 🔥 ANA BÖLÜM BAŞLIKLARI 🔥 */
+    .section-divider { cursor: pointer; transition: background 0.2s; }
+    .section-divider:hover { background-color: #e5e5ea !important; }
+    .section-divider td {
+        background: #f2f2f7; color: #8e8e93; font-weight: 700;
+        font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;
+        padding: 12px 20px !important;
+    }
+    .chevron-main { float: right; transition: transform 0.3s ease; }
+    .collapsed .chevron-main { transform: rotate(-90deg); }
+
+    /* Başlangıçta hepsi kapalı */
+    .section-folders, .section-others, .member-row { display: none; }
+
+    .group-header { background-color: #fff; cursor: pointer; font-weight: 600; color: #007aff; }
+    .group-header:hover { background-color: #f2f2f7; }
+    .chevron-icon { float: right; color: #c7c7cc; transition: transform 0.3s ease; }
+    .expanded .chevron-icon { transform: rotate(90deg); }
+
+    .member-row, .individual-row { cursor: pointer; transition: background-color 0.1s; }
+    .member-row:hover, .individual-row:hover { background-color: #f2f2f7 !important; }
+
+    .avatar-placeholder {
+        width: 40px; height: 40px; background-color: #e5e5ea; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: #8e8e93; font-weight: 600; margin-right: 15px;
+    }
+    .sub-name { font-weight: 600; color: #000; font-size: 1rem; }
+    .sub-email { color: #8e8e93; font-size: 0.9rem; }
+    .indent-column { padding-left: 30px !important; background-color: #fafafa; }
+
+    /* iOS Checkbox */
+    .ios-checkbox-container { position: relative; width: 28px; height: 28px; }
+    .ios-checkbox { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
+    .ios-checkmark {
+        position: absolute; top: 0; left: 0; height: 28px; width: 28px;
+        background-color: #fff; border: 2px solid #c7c7cc; border-radius: 50%; transition: all 0.2s;
+    }
+    .ios-checkbox:checked ~ .ios-checkmark { background-color: #34c759; border-color: #34c759; }
+    .ios-checkmark:after {
+        content: ""; position: absolute; display: none;
+        left: 9px; top: 5px; width: 7px; height: 13px;
+        border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
+    .ios-checkbox:checked ~ .ios-checkmark:after { display: block; }
+
+    .ios-footer { padding: 20px; background: #fff; border-top: 1px solid #e5e5ea; }
+    .btn-ios-primary { background-color: #007aff; border: none; border-radius: 12px; font-weight: 600; padding: 12px 30px; }
+    .btn-select-all { color: #007aff; font-weight: 500; background: none; border: none; padding: 8px 15px; }
+</style>
+
+<div class="container mt-4 pb-5">
+    <form asp-action="Send" method="post" id="sendForm">
+        <input type="hidden" name="templateId" value="@template?.Id" />
+
+        <div class="ios-card">
+            <div class="ios-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="ios-title mb-1">Alıcıları Seç</h1>
+                    <p class="text-muted mb-0 small">Gönderim yapılacak kişileri belirleyin.</p>
+                </div>
+                <span class="ios-badge"><i class="fas fa-file-alt me-1"></i> @template?.Title</span>
+            </div>
+
+            <div class="ios-search-container d-flex gap-3 align-items-center">
+                <input type="text" id="subscriberSearch" class="ios-search-input" placeholder="Kişi veya klasör ara...">
+                <button type="button" class="btn-select-all text-nowrap" onclick="toggleSelectAllVisible()">Tümünü Seç</button>
+            </div>
+
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-ios align-middle">
+                    <tbody id="subscriberTable">
+                        
+                        @* 🔥 1. BÖLÜM: KLASÖRLER *@
+                        <tr class="section-divider collapsed" onclick="toggleMainSection('folders', this)">
+                            <td colspan="4">Klasörler <i class="fas fa-chevron-down chevron-main"></i></td>
+                        </tr>
+
+                        @foreach (var g in groups)
+                        {
+                            var members = Model.Where(s => groupMembers.Any(gm => gm.GroupId == g.Id && gm.SubscriberId == s.Id)).ToList();
+                            if (!members.Any()) continue;
+
+                            <tr class="group-header section-folders" onclick="toggleGroupDisplay(@g.Id, this)">
+                                <td width="50">
+                                    <div class="ios-checkbox-container">
+                                        <input type="checkbox" class="ios-checkbox group-master-check" data-group-id="@g.Id" onchange="checkAllInGroup(@g.Id, this)" onclick="event.stopPropagation()">
+                                        <span class="ios-checkmark"></span>
+                                    </div>
+                                </td>
+                                <td colspan="2">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span><i class="fas fa-folder me-2"></i> @g.GroupName <small class="text-muted ms-2">(@members.Count)</small></span>
+                                        <i class="fas fa-chevron-right chevron-icon"></i>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            @foreach (var m in members)
+                            {
+                                var initials = (m.FirstName?.FirstOrDefault().ToString() + m.LastName?.FirstOrDefault().ToString()).ToUpper();
+                                <tr class="member-row group-content-@g.Id" data-search-text="@m.FirstName @m.LastName @m.Email">
+                                    <td width="50" class="indent-column">
+                                        <div class="ios-checkbox-container">
+                                            <input type="checkbox" name="subscriberIds" value="@m.Id" class="ios-checkbox sub-check group-member-@g.Id">
+                                            <span class="ios-checkmark"></span>
+                                        </div>
+                                    </td>
+                                    <td width="50"><div class="avatar-placeholder">@initials</div></td>
+                                    <td>
+                                        <div class="sub-name">@m.FirstName @m.LastName</div>
+                                        <div class="sub-email">@m.Email</div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                        @* 🔥 2. BÖLÜM: DİĞER KİŞİLER *@
+                        <tr class="section-divider collapsed" onclick="toggleMainSection('others', this)">
+                            <td colspan="4">Diğer Kişiler <i class="fas fa-chevron-down chevron-main"></i></td>
+                        </tr>
+                        
+                        @foreach (var sub in Model)
+                        {
+                             var initials = (sub.FirstName?.FirstOrDefault().ToString() + sub.LastName?.FirstOrDefault().ToString()).ToUpper();
+                            <tr class="individual-row section-others" data-search-text="@sub.FirstName @sub.LastName @sub.Email">
+                                <td width="50">
+                                    <div class="ios-checkbox-container">
+                                        <input type="checkbox" name="subscriberIds" value="@sub.Id" class="ios-checkbox sub-check">
+                                        <span class="ios-checkmark"></span>
+                                    </div>
+                                </td>
+                                <td width="50"><div class="avatar-placeholder">@initials</div></td>
+                                <td>
+                                    <div class="sub-name">@sub.FirstName @sub.LastName</div>
+                                    <div class="sub-email">@sub.Email</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noResult" class="text-center py-5 d-none bg-white">
+                <i class="fas fa-search fa-3x text-muted mb-3 opacity-25"></i>
+                <p class="text-muted fw-medium">Sonuç bulunamadı.</p>
+            </div>
+
+            <div class="ios-footer d-flex justify-content-between align-items-center">
+                <a href="/Template/Index" class="btn-ios-secondary">Vazgeç</a>
+                <button type="submit" class="btn btn-ios-primary btn-lg shadow-sm">
+                    Gönder <i class="fas fa-paper-plane ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // --- 🔥 ANA BÖLÜM TOGGLE ---
+        function toggleMainSection(section, element) {
+            $(element).toggleClass('collapsed');
+            const isClosed = $(element).hasClass('collapsed');
+
+            if (section === 'folders') {
+                if(isClosed) {
+                    // Kapanırken her şeyi (klasörler ve içindeki üyeler) gizle
+                    $('.section-folders, .member-row').hide();
+                    $('.group-header').removeClass('expanded');
+                } else {
+                    // 🔥 KRİTİK FİX: Açılırken sadece KLASÖR BAŞLIKLARINI göster, üyeleri gizli tut
+                    $('.group-header.section-folders').show();
+                    $('.member-row').hide();
+                }
+            } else {
+                $('.section-others').toggle();
+            }
+        }
+
+        // --- 📁 Alt Klasör Aç/Kapat ---
+        function toggleGroupDisplay(groupId, element) {
+            $(`.group-content-${groupId}`).toggle();
+            $(element).toggleClass('expanded');
+        }
+
+        // --- ✅ Klasör Seçimi ve Senkronizasyon ---
+        function checkAllInGroup(groupId, masterCheckbox) {
+            const isChecked = masterCheckbox.checked;
+            $(`.group-member-${groupId}`).each(function() {
+                $(this).prop('checked', isChecked).trigger('change');
+            });
+        }
+
+        $(document).ready(function() {
+            // Satır tıklama
+            $(document).on('click', '.member-row, .individual-row', function(e) {
+                if ($(e.target).closest('.ios-checkbox-container').length > 0) return;
+                const checkbox = $(this).find('.sub-check');
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            });
+
+            // SENKRONİZASYON
+            $(document).on('change', '.sub-check', function() {
+                const subId = $(this).val();
+                const isChecked = $(this).prop('checked');
+                $(`.sub-check[value="${subId}"]`).prop('checked', isChecked);
+            });
+        });
+
+        // 🔍 Canlı Arama
+        document.getElementById('subscriberSearch').addEventListener('keyup', function() {
+            let searchText = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#subscriberTable tr:not(.section-divider)');
+            let foundCount = 0;
+
+            if(searchText.length > 0) {
+                $('.section-folders, .section-others, .member-row').show();
+                $('.section-divider, .group-header').removeClass('collapsed').addClass('expanded');
+            }
+
+            rows.forEach(row => {
+                if (row.classList.contains('group-header')) {
+                    let isVisible = row.innerText.toLowerCase().includes(searchText);
+                    row.style.display = isVisible ? "" : "none";
+                    if(isVisible) foundCount++; return;
+                }
+                let searchable = row.getAttribute('data-search-text')?.toLowerCase() || "";
+                if (searchable.includes(searchText)) {
+                    row.style.display = ""; foundCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+            document.getElementById('noResult').classList.toggle('d-none', foundCount > 0);
+        });
+
+        function toggleSelectAllVisible() {
+            const visibleChecks = Array.from(document.querySelectorAll('.sub-check')).filter(c => c.closest('tr').style.display !== "none");
+            const allChecked = visibleChecks.every(c => c.checked);
+            visibleChecks.forEach(c => $(c).prop('checked', !allChecked).trigger('change'));
+        }
+    </script>
+}

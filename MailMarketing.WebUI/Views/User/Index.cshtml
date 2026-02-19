@@ -1,0 +1,161 @@
+@using System.Security.Claims
+@model IEnumerable<MailMarketing.Entity.User>
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+}
+
+@* 🔥 GÜVENLİK: Antiforgery Token *@
+@Html.AntiForgeryToken()
+
+<style>
+    .password-reveal {
+        filter: blur(5px);
+        transition: filter 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+    }
+    .password-reveal:hover {
+        filter: blur(0);
+    }
+    .user-table-card { border-radius: 15px; overflow: hidden; }
+    .btn-action { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-action:hover { transform: scale(1.1); }
+</style>
+
+<div class="container mt-4">
+    <div class="card shadow user-table-card border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="fas fa-user-shield me-2 text-info"></i> Sistem Kullanıcıları</h5>
+            <span class="badge bg-primary rounded-pill px-3">Toplam: @Model.Count()</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Ad Soyad</th>
+                            <th>E-Posta</th>
+                            <th>Parola</th> 
+                            <th>Kayıt Zamanı</th>
+                            <th>Yetki</th>
+                            <th>Durum</th>
+                            <th class="text-end pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@user.FirstName @user.LastName</div>
+                                    <small class="text-muted">@(user.DisplayName ?? "İsimsiz")</small>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <code class="text-danger fw-bold password-reveal" title="Görmek için üzerine gel">
+                                        @user.Password
+                                    </code>
+                                </td>
+                                <td><small class="text-secondary">@user.CreatedDate.ToString("dd.MM.yyyy")</small></td>
+                                <td>
+                                    @if (user.IsAdmin)
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">
+                                            <i class="fas fa-crown me-1"></i> Yönetici
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border rounded-pill px-3">
+                                            <i class="fas fa-user me-1"></i> Kullanıcı
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-3">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill px-3">Pasif</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (User.FindFirstValue(ClaimTypes.Email) != user.Email)
+                                    {
+                                        @* 🔥 KRİTİK GİZLİLİK GÜNCELLEMESİ: 
+                                           Eğer hedef kişi adminse, sadece Root Admin (Ana Patron) bu butonu görebilir. *@
+                                        @if (!user.IsAdmin || (ViewBag.IsRootAdmin ?? false))
+                                        {
+                                            <a asp-action="Activity" asp-route-id="@user.Id" class="btn btn-outline-info btn-action rounded-circle shadow-sm me-1" title="Aktivite İzle">
+                                                <i class="fas fa-history"></i>
+                                            </a>
+                                        }
+
+                                        @* Yetki Değiştir *@
+                                        <button type="button" class="btn btn-action @(user.IsAdmin ? "btn-warning" : "btn-info") text-white rounded-circle shadow-sm" 
+                                                onclick="confirmAction('/User/ToggleAdmin/@user.Id', '@user.FirstName @user.LastName yetkisi değiştirilsin mi?')"
+                                                title="@(user.IsAdmin ? "Yetkiyi Geri Al" : "Yönetici Yap")">
+                                            <i class="fas @(user.IsAdmin ? "fa-user-minus" : "fa-user-shield")"></i>
+                                        </button>
+
+                                        @* Durum Değiştir *@
+                                        <button type="button" class="btn btn-action @(user.IsActive ? "btn-outline-danger" : "btn-outline-success") rounded-circle ms-1 shadow-sm" 
+                                                onclick="confirmAction('/User/ToggleStatus/@user.Id', 'Kullanıcı durumu değiştirilsin mi?')"
+                                                title="@(user.IsActive ? "Pasife Al" : "Aktif Et")">
+                                            <i class="fas @(user.IsActive ? "fa-user-slash" : "fa-user-check")"></i>
+                                        </button>
+
+                                        @* Sil *@
+                                        <button type="button" class="btn btn-action btn-outline-dark rounded-circle ms-1 shadow-sm" 
+                                                onclick="confirmDelete('/User/Delete/@user.Id', 'Bu kullanıcı tamamen silinecek!')"
+                                                title="Kullanıcıyı Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">
+                                            <i class="fas fa-user-circle me-1"></i> Senin Hesabın
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmAction(url, message) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: message,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Onayla',
+                cancelButtonText: 'Vazgeç',
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: { __RequestVerificationToken: token },
+                        success: function () { location.reload(); },
+                        error: function () { Swal.fire('Hata!', 'İşlem gerçekleştirilemedi.', 'error'); }
+                    });
+                }
+            });
+        }
+    </script>
+}

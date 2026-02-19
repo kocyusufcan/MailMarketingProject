@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MailMarketing</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .user-dropdown-toggle { transition: all 0.3s ease; border: 1px solid #eee; }
+        .user-dropdown-toggle:hover { background-color: #f8f9fa; border-color: #0d6efd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .avatar-circle { 
+            width: 35px; height: 35px; 
+            background: linear-gradient(45deg, #0d6efd, #00d2ff); 
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; color: white; font-weight: bold; font-size: 0.9rem; 
+        }
+        .dropdown-animate { animation: fadeIn 0.3s ease; }
+        
+        @@keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .global-alert-area { position: sticky; top: 10px; z-index: 1050; }
+        .hover-primary:hover { color: #0d6efd !important; transition: color 0.3s; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold text-primary" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-paper-plane"></i> MailMarketing
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (User.Identity is not { IsAuthenticated: true })
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Home" asp-action="About">Hakkımızda</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Home" asp-action="Contact">İletişim</a></li>
+                        }
+                        @if (User.Identity is { IsAuthenticated: true })
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Home" asp-action="Index"><i class="fas fa-home text-secondary me-1"></i> Anasayfa</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Subscriber" asp-action="Index"><i class="fas fa-users text-secondary me-1"></i> Aboneler</a></li>
+                            
+                            @* 🔥 GÜNCELLENDİ: Klasörler simgesi diğerleriyle uyumlu hale getirildi (text-secondary) *@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark @(ViewContext.RouteData.Values["Action"]?.ToString() == "Groups" ? "active fw-bold" : "")" asp-controller="Subscriber" asp-action="Groups">
+                                    <i class="fas fa-folder-open text-secondary me-1"></i> Klasörler
+                                </a>
+                            </li>
+
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Template" asp-action="Index"><i class="fas fa-file-code text-secondary me-1"></i> Şablonlar</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="MailLog" asp-action="Index"><i class="fas fa-poll text-secondary me-1"></i> Raporlar</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark fw-bold text-info" asp-controller="Setting" asp-action="Index"><i class="fas fa-tools me-1"></i> Tanım Sayfası</a></li>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger fw-bold shadow-sm rounded-pill px-3 ms-2" asp-controller="User" asp-action="Index">
+                                        <i class="fas fa-user-shield me-1"></i> Kullanıcılar
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity is { IsAuthenticated: true })
+                        {
+                            <li class="nav-item me-3 d-flex align-items-center">
+                                <a class="nav-link text-dark position-relative" asp-controller="Home" asp-action="Notifications" id="notifIcon" onclick="markNotificationsAsRead()">
+                                    <i class="fas fa-bell fa-lg text-secondary hover-primary"></i>
+                                    <span id="navBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">
+                                        0
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center user-dropdown-toggle rounded-pill px-3" 
+                                   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    
+                                    <div class="avatar-circle me-2 shadow-sm">
+                                        @(User.FindFirst("FirstName")?.Value.Substring(0, 1).ToUpper() ?? "U")
+                                    </div>
+
+                                    <span class="text-dark fw-bold">
+                                        @User.FindFirst("FirstName")?.Value @User.FindFirst("LastName")?.Value
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow dropdown-animate mt-2">
+                                    <li><div class="dropdown-header text-muted">Hesap Yönetimi</div></li>
+                                    <li><a class="dropdown-item py-2" asp-controller="User" asp-action="Profile"><i class="fas fa-id-card text-primary me-2"></i> Profil Bilgilerim</a></li>
+                                    <li><a class="dropdown-item py-2" asp-controller="Setting" asp-action="Index"><i class="fas fa-cog text-secondary me-2"></i> SMTP Ayarlarım</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-danger fw-bold" asp-controller="Account" asp-action="Logout"><i class="fas fa-power-off me-2"></i> Güvenli Çıkış</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark fw-bold" asp-controller="Account" asp-action="Login">Giriş Yap</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark fw-bold text-primary border border-primary rounded-pill px-3 ms-2" asp-controller="Account" asp-action="Register">Kayıt Ol</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="toast-container position-fixed top-0 end-0 p-3" id="notificationArea" style="z-index: 9999;"></div>
+
+        <div class="global-alert-area">
+            @if (TempData["Message"] != null) { <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4">@TempData["Message"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+            @if (TempData["Error"] != null) { <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4">@TempData["Error"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+        </div>
+        <main role="main" class="pb-3">@RenderBody()</main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-5"><div class="container text-center py-3">&copy; 2026 - MailMarketing</div></footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function confirmDelete(url, message = "Bu kayıt kalıcı olarak silinecek ve geri alınamaz!") {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            var successMsg = '@Html.Raw(TempData["Message"])';
+            if (successMsg && successMsg !== '') {
+                Swal.fire({ icon: 'success', title: 'Başarılı!', text: successMsg, timer: 3000, showConfirmButton: false });
+            }
+
+            var errorMsg = '@Html.Raw(TempData["Error"])';
+            if (errorMsg && errorMsg !== '') {
+                Swal.fire({ icon: 'error', title: 'İşlem Engellendi!', text: errorMsg, confirmButtonColor: '#d33', confirmButtonText: 'Anladım' });
+            }
+
+            @if (User.Identity?.IsAuthenticated == true) {
+                <text>
+                checkNotifications();
+                setInterval(checkNotifications, 15000); 
+                $.post('/Home/CheckMyBounces'); 
+                </text>
+            }
+        });
+
+        var lastCheckCount = parseInt(sessionStorage.getItem('lastBounceCount') || "0");
+        var isDismissed = sessionStorage.getItem('isBounceDismissed') === "true";
+
+        function checkNotifications() {
+            $.get('/Home/GetNotifications', function (response) {
+                var badge = $('#navBadge');
+                var count = response.totalCount; 
+                var list = response.list; 
+                
+                if (count > 0) {
+                    var displayText = count;
+                    if (count > 30) { displayText = "30+"; }
+                    else if (count > 20) { displayText = "20+"; }
+                    else if (count > 10) { displayText = "10+"; }
+
+                    badge.text(displayText).show();
+
+                    if (count > lastCheckCount) {
+                        isDismissed = false;
+                        sessionStorage.setItem('isBounceDismissed', "false");
+                        showToasts(list); 
+                    } 
+                    else if (count === lastCheckCount && !isDismissed && $('#notificationArea').children().length === 0) {
+                        showToasts(list);
+                    }
+                    lastCheckCount = count;
+                    sessionStorage.setItem('lastBounceCount', count.toString());
+                } else {
+                    badge.hide();
+                    lastCheckCount = 0;
+                    isDismissed = false;
+                    sessionStorage.setItem('lastBounceCount', "0");
+                    sessionStorage.setItem('isBounceDismissed', "false");
+                }
+            });
+        }
+
+        function markNotificationsAsRead() {
+            $.post('/Home/MarkAllNotificationsAsRead', function () {
+                $('#navBadge').hide().text('0');
+                sessionStorage.setItem('lastBounceCount', "0");
+                sessionStorage.setItem('isBounceDismissed', "true");
+            });
+        }
+
+        function showToasts(data) {
+            $('#notificationArea').empty(); 
+            if (data.length > 3) {
+                appendToast("Toplu Hata!", data.length + " adet iletilemeyen mail tespit edildi.", "summary");
+            } else {
+                data.forEach(function (notif) {
+                    appendToast(notif.title, notif.message, notif.id);
+                });
+            }
+        }
+
+        function appendToast(title, message, id) {
+            var html = `
+                <div id="notif-${id}" class="toast show border-0 shadow mb-2" role="alert" style="min-width:280px">
+                    <div class="toast-header bg-danger text-white">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" onclick="dismissToast()"></button>
+                    </div>
+                    <div class="toast-body bg-white text-dark">${message}</div>
+                </div>`;
+            $('#notificationArea').append(html);
+            setTimeout(function() {
+                var target = $('#notif-' + id);
+                if (target.length > 0) {
+                    target.fadeOut(500, function() { 
+                        $(this).remove(); 
+                        dismissToast(); 
+                    });
+                }
+            }, 3500); 
+        }
+
+        function dismissToast() {
+            isDismissed = true; 
+            sessionStorage.setItem('isBounceDismissed', "true");
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

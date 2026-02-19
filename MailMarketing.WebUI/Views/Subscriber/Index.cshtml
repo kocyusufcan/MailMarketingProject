@@ -1,0 +1,646 @@
+@using MailMarketing.Entity
+@model List<Subscriber>
+
+@{
+    ViewData["Title"] = "Abone Yönetimi";
+    // Not: Gruplar AJAX ile yüklenecek, ancak başlangıç verisi ve SelectedGroup nesnesi önemli
+    var groups = ViewBag.Groups as List<SubscriberGroup> ?? new List<SubscriberGroup>();
+    // Controller'dan özel olarak gönderdiğimiz seçili klasör nesnesi
+    var selectedGroup = ViewBag.SelectedGroupObject as SubscriberGroup;
+}
+
+<style>
+    /* 🔵 SEÇİLEN SATIR STİLİ */
+    tbody tr { cursor: pointer; transition: all 0.2s; }
+    tbody tr.is-selected {
+        background-color: #f0f7ff !important;
+        box-shadow: inset 4px 0 0 0 #6366f1; /* Sol tarafa kalın şerit */
+    }
+    /* Link ve butonlarda imleci normale döndür */
+    tbody tr a, tbody tr button, tbody tr .dropdown-menu, tbody tr .badge { cursor: default; }
+    
+    /* Sayfalama ve Genel Görsel Düzenlemeler */
+    .pagination .page-link { transition: all 0.2s; }
+    .pagination .page-item.active .page-link { background-color: #6366f1 !important; color: white !important; }
+    
+    /* Dropdown Scroll */
+    .folder-scroll-area::-webkit-scrollbar { width: 5px; }
+    .folder-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+</style>
+
+@* 🔥 BİLDİRİM SİSTEMİ *@
+@if (TempData["Error"] != null)
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({ icon: 'error', title: 'İşlem Engellendi!', text: '@TempData["Error"]', confirmButtonColor: '#6366f1' });
+        });
+    </script>
+}
+@if (TempData["Message"] != null)
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({ icon: 'success', title: 'Başarılı', text: '@TempData["Message"]', timer: 3000, showConfirmButton: false });
+        });
+    </script>
+}
+
+<div class="container mt-4">
+
+    @* 🔥 1. ÜST BAŞLIK VE TOPLU İŞLEMLER *@
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="text-primary fw-bold mb-0 fs-4"><i class="fas fa-address-book me-2"></i>Abone Yönetimi</h2>
+            <small class="text-muted">Toplam @ViewBag.TotalRecords abone listeleniyor</small>
+        </div>
+        
+        @* 🔥 BUTON GRUBU *@
+        <div class="d-flex gap-1 align-items-center flex-wrap justify-content-end">
+            
+            @* 🔥 AKILLI BUTON MANTIĞI *@
+            @if (ViewBag.SelectedGroupId != null)
+            {
+                <button type="button" id="btnRemoveFromGroup" class="btn btn-sm btn-outline-danger shadow-sm rounded-pill px-3 fw-bold" style="display:none;" onclick="removeFromGroup()">
+                    <i class="fas fa-folder-minus me-1"></i>Bu Klasörden Çıkar (<span class="selectedCountText">0</span>)
+                </button>
+            }
+            else
+            {
+                <button type="button" id="btnRemoveFromAllGroups" class="btn btn-sm btn-outline-dark shadow-sm rounded-pill px-3 fw-bold" style="display:none;" onclick="removeFromAllGroups()">
+                    <i class="fas fa-eraser me-1"></i>Bağlantıları Kes (<span class="selectedCountText">0</span>)
+                </button>
+            }
+
+            <button type="button" id="btnBulkDelete" class="btn btn-sm btn-danger shadow-sm rounded-pill px-3" style="display:none;" onclick="confirmBulkAction('delete')">
+                <i class="fas fa-trash-alt me-1"></i>Sil (<span class="selectedCountText">0</span>)
+            </button>
+
+            <button type="button" id="btnBulkActivate" class="btn btn-sm btn-success shadow-sm rounded-pill px-3 text-white" style="display:none;" onclick="confirmBulkAction('activate')">
+                <i class="fas fa-check-circle me-1"></i>Aktif
+            </button>
+
+            <button type="button" id="btnBulkDeactivate" class="btn btn-sm btn-warning shadow-sm rounded-pill px-3 text-white" style="display:none;" onclick="confirmBulkAction('deactivate')">
+                <i class="fas fa-minus-circle me-1"></i>Pasif
+            </button>
+
+            @* 🔥 DROPDOWN: TOPLU EKLEME (ARAMA + ÇOKLU SEÇİM + HAFIZA) *@
+            <div id="bulkGroupArea" class="dropdown" style="display:none;">
+                <button class="btn btn-sm btn-info shadow-sm rounded-pill px-3 dropdown-toggle text-white" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <i class="fas fa-folder-plus me-1"></i>Ekle
+                </button>
+                
+                <div class="dropdown-menu shadow border-0 p-2" style="width: 300px;">
+                    <div class="mb-2 position-relative">
+                        <input type="text" id="folderSearchInput" class="form-control form-control-sm ps-4" 
+                               placeholder="Klasör ara..." onkeyup="searchFoldersForAddAjax(this.value)">
+                        <i class="fas fa-search position-absolute text-muted small" style="top: 9px; left: 10px;"></i>
+                    </div>
+
+                    <div id="folderListContainer" class="folder-scroll-area" style="max-height: 250px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 8px;">
+                        <ul class="list-group list-group-flush small" id="folderCheckList">
+                            <li class="list-group-item text-center text-muted py-3 small"><i class="fas fa-search me-1"></i>Aramak için yazın...</li>
+                        </ul>
+                        <div id="loadMoreFoldersArea" style="display:none;" class="text-center py-2 border-top">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="loadMoreFolders()"><i class="fas fa-plus me-1"></i>Daha Fazla</button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-2">
+                        <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="submitBulkAddToGroups()">
+                            Seçilenlere Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/Subscriber/Import" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3"><i class="fas fa-file-excel me-1"></i> Excel</a>
+            <a href="/Subscriber/Create" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3 fw-bold"><i class="fas fa-user-plus me-1"></i> Yeni</a>
+        </div>
+    </div>
+
+    @* 🔥 2. KLASÖR FİLTRELEME *@
+    <div class="d-flex align-items-center justify-content-end flex-wrap gap-2 mb-4">
+        <a href="/Subscriber/Index" class="btn btn-sm @(ViewBag.SelectedGroupId == null ? "btn-primary shadow" : "btn-outline-secondary") rounded-pill px-3 fw-bold">Tümü</a>
+
+        @if (selectedGroup != null)
+        {
+            <span class="badge bg-info text-white rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center">
+                <i class="fas fa-folder-open me-2"></i> @selectedGroup.GroupName
+                <a href="/Subscriber/Index" class="text-white ms-2" title="Kapat"><i class="fas fa-times-circle"></i></a>
+            </span>
+        }
+
+        @* DROPDOWN: KLASÖR SEÇ (ARAMA + AJAX FİLTRELEME) *@
+        <div class="shadow-sm rounded-pill border bg-white" id="filterGroupArea">
+            <div class="dropdown">
+                <button class="btn btn-sm btn-white dropdown-toggle fw-bold px-3 border-0" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-folder text-info me-1"></i> Klasör Seç
+                </button>
+                <ul class="dropdown-menu shadow border-0 mt-2 dropdown-menu-end" style="max-height: 400px; width: 250px; z-index: 1050;">
+                    <li class="px-3 py-2 sticky-top bg-white border-bottom">
+                        <input type="text" class="form-control form-control-sm rounded-pill border-info" placeholder="Hızlı ara..." onkeyup="searchFoldersForFilterAjax(this.value)">
+                    </li>
+                    <div id="dropdownFilterList" class="folder-scroll-area" style="max-height: 300px; overflow-y: auto;">
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    @* 🔥 3. FİLTRELEME FORMU *@
+    <div class="card shadow-sm border-0 mb-4 bg-white" style="border-radius: 15px;">
+        <div class="card-body py-3">
+             <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <input type="hidden" name="groupId" value="@ViewBag.SelectedGroupId" />
+                <div class="col-md-3"><label class="small fw-bold text-muted ms-1">Arama</label><input type="text" name="searchString" class="form-control form-control-sm bg-light border-0" placeholder="İsim veya E-posta..." value="@ViewBag.SearchString"></div>
+                <div class="col-md-2"><label class="small fw-bold text-muted ms-1">Durum</label><select name="status" class="form-select form-select-sm bg-light border-0"><option value="">Tümü</option><option value="active" selected='@(ViewBag.CurrentStatus == "active")'>Aktifler</option><option value="passive" selected='@(ViewBag.CurrentStatus == "passive")'>Pasifler</option></select></div>
+                <div class="col-md-2 col-6"><label class="small fw-bold text-muted ms-1">Başlangıç</label><input type="date" name="startDate" class="form-control form-control-sm bg-light border-0" value="@ViewBag.StartDate"></div>
+                <div class="col-md-2 col-6"><label class="small fw-bold text-muted ms-1">Bitiş</label><input type="date" name="endDate" class="form-control form-control-sm bg-light border-0" value="@ViewBag.EndDate"></div>
+                <div class="col-md-3"><button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm fw-bold">Abone Filtrele</button></div>
+            </form>
+        </div>
+    </div>
+
+    @* 🔥 4. TABLO *@
+    <form id="bulkActionForm" method="post">
+        <div class="card shadow border-0 overflow-hidden" style="border-radius: 15px;">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle" id="subscriberTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 40px;"><input type="checkbox" id="selectAll" class="form-check-input"></th>
+                            <th class="py-3 text-muted small text-uppercase">Abone Bilgisi</th> 
+                            <th class="text-muted small text-uppercase">E-Posta</th>
+                            <th class="text-muted small text-uppercase">Kayıt Tarihi</th>
+                            <th class="text-muted small text-uppercase text-center">Durum</th>
+                            <th class="text-center text-muted small text-uppercase">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr data-id="@item.Id">
+                                <td class="ps-4"><input type="checkbox" name="selectedIds" value="@item.Id" class="form-check-input sub-checkbox"></td>
+                                <td><div class="fw-bold text-dark">@item.FirstName @item.LastName</div><small class="text-muted">ID: #@item.Id</small></td>
+                                <td><span class="text-secondary small">@item.Email</span></td>
+                                <td><span class="text-muted small">@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span></td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("ToggleStatus", "Subscriber", new { id = item.Id })" class="text-decoration-none status-toggle-link">
+                                        <span class="badge @(item.IsActive ? "bg-success" : "bg-danger")-subtle text-@(item.IsActive ? "success" : "danger") rounded-pill px-3" title="Durumu Değiştirmek İçin Tıkla">
+                                            @(item.IsActive ? "Aktif" : "Pasif")
+                                        </span>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden bg-white border">
+                                        <button type="button" class="btn btn-white btn-sm border-0 text-info" onclick="openGroupModal(@item.Id)" title="Klasöre Ekle"><i class="fas fa-folder-plus"></i></button>
+                                        <a href="/Subscriber/Edit/@item.Id" class="btn btn-white btn-sm border-0 text-primary border-start border-end"><i class="fas fa-edit"></i></a>
+                                        <button type="button" class="btn btn-white btn-sm border-0 text-danger" onclick="confirmDeleteSubscriber(@item.Id)"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+
+    @if (ViewBag.TotalPages > 1) {
+        <nav class="mt-4"><ul class="pagination justify-content-center gap-1">
+            @{
+                int cur = ViewBag.CurrentPage;
+                int total = ViewBag.TotalPages;
+                int delta = 2; // aktif sayfanın her iki tarafında kaç sayfa gösterilsin
+                int rangeStart = Math.Max(2, cur - delta);
+                int rangeEnd = Math.Min(total - 1, cur + delta);
+            }
+
+            @* Geri Butonu *@
+            <li class="page-item @(cur == 1 ? "disabled" : "")">
+                <a class="page-link border-0 rounded-pill shadow-sm px-3" href="@Url.Action("Index", new { page = cur - 1, searchString = ViewBag.SearchString, groupId = ViewBag.SelectedGroupId, status = ViewBag.CurrentStatus })"><i class="fas fa-chevron-left small"></i></a>
+            </li>
+
+            @* İlk Sayfa (her zaman göster) *@
+            <li class="page-item @(cur == 1 ? "active" : "")">
+                <a class="page-link border-0 rounded-pill shadow-sm px-3" href="@Url.Action("Index", new { page = 1, searchString = ViewBag.SearchString, groupId = ViewBag.SelectedGroupId, status = ViewBag.CurrentStatus })">1</a>
+            </li>
+
+            @* Sol ... *@
+            @if (rangeStart > 2) {
+                <li class="page-item disabled"><span class="page-link border-0 bg-transparent px-2">...</span></li>
+            }
+
+            @* Orta Sayfalar *@
+            @for (int i = rangeStart; i <= rangeEnd; i++) {
+                <li class="page-item @(cur == i ? "active" : "")">
+                    <a class="page-link border-0 rounded-pill shadow-sm px-3" href="@Url.Action("Index", new { page = i, searchString = ViewBag.SearchString, groupId = ViewBag.SelectedGroupId, status = ViewBag.CurrentStatus })">@i</a>
+                </li>
+            }
+
+            @* Sağ ... *@
+            @if (rangeEnd < total - 1) {
+                <li class="page-item disabled"><span class="page-link border-0 bg-transparent px-2">...</span></li>
+            }
+
+            @* Son Sayfa (1'den büyükse göster) *@
+            @if (total > 1) {
+                <li class="page-item @(cur == total ? "active" : "")">
+                    <a class="page-link border-0 rounded-pill shadow-sm px-3" href="@Url.Action("Index", new { page = total, searchString = ViewBag.SearchString, groupId = ViewBag.SelectedGroupId, status = ViewBag.CurrentStatus })">@total</a>
+                </li>
+            }
+
+            @* İleri Butonu *@
+            <li class="page-item @(cur == total ? "disabled" : "")">
+                <a class="page-link border-0 rounded-pill shadow-sm px-3" href="@Url.Action("Index", new { page = cur + 1, searchString = ViewBag.SearchString, groupId = ViewBag.SelectedGroupId, status = ViewBag.CurrentStatus })"><i class="fas fa-chevron-right small"></i></a>
+            </li>
+        </ul></nav>
+    }
+</div>
+
+@* --- MODALLAR --- *@
+<div class="modal fade" id="addToGroupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4"><h5 class="fw-bold">Klasöre Ekle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form asp-action="AddToGroup" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="subscriberId" id="modalSubscriberId" /> 
+                    <div class="mb-3">
+                        <input type="text" class="form-control form-control-sm border-0 bg-light mb-2" placeholder="Klasör ara..." onkeyup="filterGroupsInModal(this)">
+                        <div class="list-group list-group-flush border rounded-3 overflow-hidden" style="max-height: 200px; overflow-y: auto;">
+                            @foreach (var group in ViewBag.Groups) {
+                                <label class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 modal-group-item" style="cursor: pointer;">
+                                    <input type="radio" name="groupId" value="@group.Id" class="form-check-input mt-0" required> @group.GroupName
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 🔥 GLOBAL HAFIZA: Seçilen klasörleri ID → İsim olarak tutar
+        var globalSelectedFolderIds = new Map();
+
+        // 🔥 SEÇİM HAFIZASI (Sayfalar arası koruma)
+        var selectedSubIds = new Set();
+        const STORAGE_KEY = 'mailMarketing_selectedSubscribers';
+
+        $(document).ready(function() {
+            // 1. Hafızadan yükle (String olarak garantile)
+            loadSelection();
+
+            // 2. Sayfadaki checkboxları güncelle
+            syncCheckboxes();
+
+            // 3. Checkbox değişimlerini dinle
+            $(document).on('change', '.sub-checkbox', function() {
+                var id = String($(this).val()); // String'e çevir
+                if (this.checked) {
+                    selectedSubIds.add(id);
+                } else {
+                    selectedSubIds.delete(id);
+                }
+                saveSelection();
+                updateSelectAllState();
+                updateSelectedCountUI();
+            });
+
+            // 4. "Tümü Seç" değişimi
+            $('#selectAll').on('change', function() {
+                var isChecked = this.checked;
+                $('.sub-checkbox').each(function() {
+                    this.checked = isChecked;
+                    var id = String($(this).val());
+                    if (isChecked) selectedSubIds.add(id);
+                    else selectedSubIds.delete(id);
+                });
+                saveSelection();
+                updateSelectedCountUI();
+            });
+
+            // Checkbox ve Satır Tıklama
+            $('#subscriberTable tbody tr').on('click', function(e) {
+                if ($(e.target).closest('a, button, .dropdown-menu, .form-check-input').length) return;
+                const checkbox = $(this).find('.sub-checkbox');
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            });
+
+             // Dropdown kapanmasını engelle
+            $('.dropdown-menu').on('click', function(e) { e.stopPropagation(); });
+            renderSelectedFolders();
+            $('#bulkGroupArea').on('show.bs.dropdown', function () { 
+                $('#folderSearchInput').val(''); // Arama kutusunu temizle
+                renderSelectedFolders(); 
+            });
+            $('#filterGroupArea .dropdown').on('show.bs.dropdown', function () {
+                $(this).find('input').val('');
+                $('#dropdownFilterList').html('<li><span class="dropdown-item small text-muted"><i class="fas fa-search me-1"></i>Aramak için yazın...</span></li>');
+            });
+        });
+
+        function loadSelection() {
+            try {
+                var stored = sessionStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    var arr = JSON.parse(stored);
+                    // Hepsini string'e çevirip sete at
+                    selectedSubIds = new Set(arr.map(String));
+                }
+            } catch (e) {
+                console.error("Selection load error:", e);
+                selectedSubIds = new Set();
+            }
+            updateSelectedCountUI();
+        }
+
+        function saveSelection() {
+            // Array'e çevirip sakla
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedSubIds)));
+        }
+
+        function clearSelection() {
+            selectedSubIds.clear();
+            sessionStorage.removeItem(STORAGE_KEY);
+            updateSelectedCountUI();
+            syncCheckboxes();
+        }
+
+        function syncCheckboxes() {
+            $('.sub-checkbox').each(function() {
+                var id = String($(this).val());
+                if (selectedSubIds.has(id)) {
+                    this.checked = true;
+                    $(this).closest('tr').addClass('is-selected'); // Görsel geri bildirim
+                } else {
+                    this.checked = false; // Garanti olsun
+                    $(this).closest('tr').removeClass('is-selected'); // Görsel geri bildirim
+                }
+            });
+            updateSelectAllState();
+        }
+
+        function updateSelectAllState() {
+            var totalCheckboxes = $('.sub-checkbox').length;
+            var checkedCheckboxes = $('.sub-checkbox:checked').length;
+            var isAllChecked = totalCheckboxes > 0 && totalCheckboxes === checkedCheckboxes;
+            $('#selectAll').prop('checked', isAllChecked);
+        }
+
+        function updateSelectedCountUI() {
+            var count = selectedSubIds.size;
+            var badgeId = 'selectedCountBadge';
+            var badge = $('#' + badgeId);
+            
+            // Bulk action butonlarını göster/gizle
+            const display = count > 0 ? 'inline-block' : 'none';
+            $('#btnBulkDelete, #btnBulkActivate, #btnBulkDeactivate, #bulkGroupArea, #btnRemoveFromGroup, #btnRemoveFromAllGroups').css('display', display);
+
+            // 🔥 BUTON METİNLERİNİ GÜNCELLE (Sayacı Yaz)
+            $('.selectedCountText').text(count);
+
+            if (count > 0) {
+                if (badge.length === 0) {
+                    // Badge yoksa başlığın yanına ekle
+                    // H5 başlık: "Abone Yönetimi"
+                    $('.fw-bold.text-primary.mb-0').parent().append(`
+                        <span id="${badgeId}" class="badge bg-primary rounded-pill ms-2 animate__animated animate__fadeIn">
+                            ${count} Seçili
+                        </span>
+                        <button id="clearSelectionBtn" class="btn btn-sm btn-link text-danger text-decoration-none ms-1 p-0 small" onclick="clearSelection()" title="Seçimi Temizle">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `);
+                } else {
+                    badge.text(`${count} Seçili`);
+                    badge.show();
+                    $('#clearSelectionBtn').show();
+                }
+            } else {
+                if (badge.length > 0) {
+                    badge.hide();
+                    $('#clearSelectionBtn').hide();
+                }
+            }
+        }
+
+        //  Seçili klasörleri göster (arama boşken)
+        function renderSelectedFolders() {
+            var listContainer = $('#folderCheckList');
+            listContainer.empty();
+            if (globalSelectedFolderIds.size === 0) {
+                listContainer.html('<li class="list-group-item text-center text-muted py-3 small"><i class="fas fa-search me-1"></i>Aramak için yazın...</li>');
+                return;
+            }
+            globalSelectedFolderIds.forEach(function(name, id) {
+                var listItem = `
+                    <li class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 folder-option bg-light text-primary fw-bold" 
+                        style="cursor: pointer;" onclick="toggleFolderCheckbox(this)">
+                        <input type="checkbox" class="form-check-input folder-checkbox mt-0" value="${id}" checked style="pointer-events: none;"> 
+                        <label class="form-check-label w-100" style="cursor: pointer;">${name}</label>
+                    </li>`;
+                listContainer.append(listItem);
+            });
+        }
+
+        // 🚀 FONKSİYON 1: "EKLE" DROPDOWN İÇİN AJAX (Hafızalı Arama + Sayfalandırma)
+        var addSearchTimeout;
+        var addFolderPage = 1;
+        var addFolderSearchTerm = '';
+        function searchFoldersForAddAjax(keyword, append) {
+            clearTimeout(addSearchTimeout);
+            var listContainer = $('#folderCheckList');
+            if (!append) {
+                addFolderPage = 1;
+                addFolderSearchTerm = keyword;
+            }
+            // Boş aramada sadece seçili klasörleri göster
+            if (!addFolderSearchTerm || addFolderSearchTerm.trim() === '') {
+                renderSelectedFolders();
+                $('#loadMoreFoldersArea').hide();
+                return;
+            }
+            addSearchTimeout = setTimeout(function() {
+                if (!append) listContainer.html('<li class="list-group-item text-center text-muted small">Aranıyor...</li>');
+
+                $.get('/Subscriber/SearchGroupsAjax', { term: addFolderSearchTerm, page: addFolderPage }, function(resp) {
+                    if (!append) listContainer.empty();
+                    if (resp.data.length === 0 && !append) {
+                        listContainer.html('<li class="list-group-item text-center text-muted small">Bulunamadı.</li>');
+                        $('#loadMoreFoldersArea').hide();
+                        return;
+                    }
+                    resp.data.forEach(function(g) {
+                        var isChecked = globalSelectedFolderIds.has(g.id);
+                        var activeClass = isChecked ? 'bg-light text-primary fw-bold' : '';
+                        var checkedAttr = isChecked ? 'checked' : '';
+
+                        var listItem = `
+                            <li class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 folder-option ${activeClass}" 
+                                style="cursor: pointer;" onclick="toggleFolderCheckbox(this)">
+                                <input type="checkbox" class="form-check-input folder-checkbox mt-0" value="${g.id}" ${checkedAttr} style="pointer-events: none;"> 
+                                <label class="form-check-label w-100" style="cursor: pointer;">${g.groupName}</label>
+                            </li>`;
+                        listContainer.append(listItem);
+                    });
+                    // Daha fazla var mı?
+                    var loaded = resp.page * resp.pageSize;
+                    $('#loadMoreFoldersArea').toggle(loaded < resp.totalCount);
+                });
+            }, 300);
+        }
+        function loadMoreFolders() {
+            addFolderPage++;
+            searchFoldersForAddAjax(addFolderSearchTerm, true);
+        }
+
+        // 🚀 FONKSİYON 2: "KLASÖR SEÇ" DROPDOWN İÇİN AJAX (Hızlı Filtreleme)
+        var filterSearchTimeout;
+        function searchFoldersForFilterAjax(keyword) {
+            clearTimeout(filterSearchTimeout);
+            var listContainer = $('#dropdownFilterList');
+            // Boş aramada klasör gösterme
+            if (!keyword || keyword.trim() === '') {
+                listContainer.html('<li><span class="dropdown-item small text-muted"><i class="fas fa-search me-1"></i>Aramak için yazın...</span></li>');
+                return;
+            }
+            filterSearchTimeout = setTimeout(function() {
+                $.get('/Subscriber/SearchGroupsAjax', { term: keyword }, function(resp) {
+                    listContainer.empty();
+                    if (resp.data.length === 0) { listContainer.append('<li><span class="dropdown-item small text-muted">Sonuç yok</span></li>'); return; }
+                    resp.data.forEach(function(g) {
+                        listContainer.append(`<li><a class="dropdown-item small" href="/Subscriber/Index?groupId=${g.id}">${g.groupName}</a></li>`);
+                    });
+                });
+            }, 300);
+        }
+
+        function toggleFolderCheckbox(liElement) {
+            var checkbox = liElement.querySelector('.folder-checkbox');
+            checkbox.checked = !checkbox.checked;
+            var folderId = parseInt(checkbox.value);
+            var folderName = liElement.querySelector('.form-check-label').textContent;
+            if(checkbox.checked) {
+                liElement.classList.add('bg-light', 'text-primary', 'fw-bold');
+                globalSelectedFolderIds.set(folderId, folderName);
+            } else {
+                liElement.classList.remove('bg-light', 'text-primary', 'fw-bold');
+                globalSelectedFolderIds.delete(folderId);
+            }
+        }
+
+        // --- GÜNCELLENMİŞ TOPLU İŞLEM FONKSİYONLARI ---
+        function submitBulkAddToGroups() {
+            // ARTIK DOM'DAN DEĞİL, HAFIZADAN (selectedSubIds) ALIYORUZ
+            var subIds = Array.from(selectedSubIds);
+            var grpIds = Array.from(globalSelectedFolderIds.keys());
+
+            if (subIds.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen en az bir abone seçin.' }); return; }
+            if (grpIds.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen eklenecek bir klasör seçin.' }); return; }
+
+            $.post('/Subscriber/BulkAddToGroup', { subscriberIds: subIds, groupIds: grpIds }, function(res) {
+                if(res.success) { 
+                    Swal.fire({ icon: 'success', title: 'Başarılı!', text: res.message, timer: 1500, showConfirmButton: false })
+                    .then(() => { 
+                        globalSelectedFolderIds.clear(); 
+                        selectedSubIds.clear(); 
+                        saveSelection();
+                        location.reload(); 
+                    });
+                }
+            });
+        }
+
+        function removeFromAllGroups() {
+            var ids = Array.from(selectedSubIds);
+            if (ids.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen abone seçin.' }); return; }
+            
+            Swal.fire({ title: 'Emin misiniz?', text: ids.length + " abonenin tüm klasör bağlantıları silinecek! (Aboneler silinmez)", icon: 'warning', showCancelButton: true, confirmButtonColor: '#212529', confirmButtonText: 'Evet, Temizle' }).then((result) => {
+                if (result.isConfirmed) { 
+                    $.post("/Subscriber/RemoveFromAllGroups", { subscriberIds: ids }, function (res) { 
+                        if(res.success) {
+                            selectedSubIds.clear(); 
+                            saveSelection();
+                            location.reload();
+                        }
+                    }); 
+                }
+            });
+        }
+
+        function removeFromGroup() {
+            var ids = Array.from(selectedSubIds);
+            if (ids.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen abone seçin.' }); return; }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            var groupId = urlParams.get('groupId');
+            if(!groupId) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Bu işlem için bir klasör seçili olmalıdır.' }); return; }
+
+            $.post("/Subscriber/RemoveFromGroup", { groupId: groupId, subscriberIds: ids }, function(res) { 
+                if(res.success) {
+                    selectedSubIds.clear();
+                    saveSelection();
+                    location.reload();
+                }
+            });
+        }
+
+        // --- MEVCUT JS FONKSİYONLARI ---
+        function openGroupModal(id) { $('#modalSubscriberId').val(id); new bootstrap.Modal(document.getElementById('addToGroupModal')).show(); }
+        
+        function confirmBulkAction(actionType) {
+            var ids = Array.from(selectedSubIds);
+            if (ids.length === 0) { Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen en az bir abone seçin.' }); return; }
+
+            let config = { title: 'Emin misiniz?', confirmButtonText: 'Evet', showCancelButton: true, cancelButtonText: 'Vazgeç' };
+            const form = document.getElementById('bulkActionForm');
+            
+            // 1. Formdaki mevcut 'selectedIds' inputlarını (checkboxlar ve hiddenlar) temizle/disable et
+            // Checkboxları disable et ki submit edilmesin, sadece bizim ekleyeceğimiz hidden inputlar gitsin
+            $(form).find('input[name="selectedIds"]').prop('disabled', true);
+            
+            // 2. Gizli inputları ekle (Tüm seçililer için)
+            $(form).find('input.dynamic-selection').remove(); // Önceki eklenenleri temizle
+
+            ids.forEach(id => {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'selectedIds', // Controller bu ismi bekliyor
+                    value: id,
+                    class: 'dynamic-selection'
+                }).appendTo(form);
+            });
+
+            if (actionType === 'delete') { config.text = "Kalıcı olarak silinecek!"; config.icon = 'warning'; config.confirmButtonColor = '#d33'; form.action = '/Subscriber/BulkDelete'; }
+            else if (actionType === 'activate') { config.text = "Aktif yapılacak."; config.icon = 'question'; config.confirmButtonColor = '#198754'; form.action = '/Subscriber/BulkActivate'; }
+            else { config.text = "Pasif yapılacak."; config.icon = 'warning'; config.confirmButtonColor = '#f59e0b'; form.action = '/Subscriber/BulkDeactivate'; }
+            
+            Swal.fire(config).then((result) => { 
+                if (result.isConfirmed) { 
+                    selectedSubIds.clear(); // Temizle
+                    saveSelection();
+                    form.submit(); 
+                } else {
+                    // İptal edilirse checkboxları tekrar enable et
+                    $(form).find('input[name="selectedIds"]').prop('disabled', false);
+                }
+            });
+        }
+
+        function confirmDeleteSubscriber(id) { Swal.fire({ title: 'Silinsin mi?', text: "Geri alınamaz!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#6c757d', confirmButtonText: 'Sil' }).then((result) => { if (result.isConfirmed) { const form = document.createElement('form'); form.method = 'POST'; form.action = '/Subscriber/Delete/' + id; document.body.appendChild(form); form.submit(); } }); }
+        
+        function filterGroupsInModal(input) { let filter = input.value.toLowerCase(); document.querySelectorAll('.modal-group-item').forEach(item => { item.style.display = item.textContent.toLowerCase().includes(filter) ? "" : "none"; }); }
+    </script>
+}
+```

@@ -1,0 +1,142 @@
+@model List<MailMarketing.Entity.ActivityLog>
+@{
+    ViewData["Title"] = "Kullanıcı Aktivite Geçmişi";
+}
+
+<div class="container mt-4">
+    @* Üst Başlık ve Geri Dön Butonu *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fas fa-history text-primary me-2"></i> Aktivite Geçmişi
+            </h2>
+            <p class="text-muted mb-0">
+                <span class="badge bg-info text-dark">@ViewBag.TargetUser</span> kullanıcısının sistem hareketleri listeleniyor.
+            </p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i> Kullanıcılara Dön
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="180" class="ps-4">İşlem Zamanı</th>
+                            <th width="220">Eylem Başlığı</th>
+                            <th>İşlem Detayı</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    <i class="fas fa-ghost fa-3x mb-3 opacity-25"></i>
+                                    <p class="lead mb-0">Bu kullanıcıya ait henüz bir aktivite kaydı bulunamadı.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var log in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 text-secondary small">
+                                        <i class="far fa-clock me-1"></i> @log.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetBadgeClass(log.ActionTitle) px-3 py-2 rounded-pill w-100 shadow-none" style="font-size: 0.85rem;">
+                                            @log.ActionTitle
+                                        </span>
+                                    </td>
+                                    <td class="text-dark">
+                                        @log.ActionDetail
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* 🔥 YENİ: SAYFALAMA BUTONLARI *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @* Önceki Sayfa *@
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link shadow-sm rounded-start" href="@Url.Action("Activity", new { id = ViewBag.TargetId, page = ViewBag.CurrentPage - 1 })">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                @* Sayfa Numaraları *@
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                        <a class="page-link shadow-sm" href="@Url.Action("Activity", new { id = ViewBag.TargetId, page = i })">@i</a>
+                    </li>
+                }
+
+                @* Sonraki Sayfa *@
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link shadow-sm rounded-end" href="@Url.Action("Activity", new { id = ViewBag.TargetId, page = ViewBag.CurrentPage + 1 })">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@* Yardımcı Fonksiyon *@
+@functions {
+    string GetBadgeClass(string? title)
+    {
+        if (string.IsNullOrEmpty(title)) return "bg-secondary";
+        
+        title = title.ToLower();
+        if (title.Contains("giriş")) return "bg-success-subtle text-success border border-success-subtle";
+        if (title.Contains("sil")) return "bg-danger-subtle text-danger border border-danger-subtle";
+        if (title.Contains("mail")) return "bg-primary-subtle text-primary border border-primary-subtle";
+        if (title.Contains("yetki") || title.Contains("durum")) return "bg-warning-subtle text-warning border border-warning-subtle";
+        if (title.Contains("güncelle") || title.Contains("değiştir") || title.Contains("yenileme")) return "bg-info-subtle text-info border border-info-subtle";
+        
+        return "bg-light text-dark border";
+    }
+}
+
+<style>
+    .table thead th {
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        border-top: none;
+    }
+    .table tbody tr {
+        transition: background 0.2s ease;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+    }
+    /* Sayfalama Stili */
+    .pagination .page-link {
+        border: none;
+        margin: 0 3px;
+        color: #495057;
+        font-weight: 600;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>

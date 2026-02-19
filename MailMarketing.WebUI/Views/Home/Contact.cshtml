@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "İletişim";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">İletişime Geçin</h1>
+        <p class="lead text-muted">Sorularınız, önerileriniz veya destek talepleriniz için bize ulaşın.</p>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-5">
+            <div class="p-4 bg-primary text-white rounded-3 shadow h-100">
+                <h3 class="mb-4"><i class="fas fa-envelope-open-text me-2"></i> İletişim Bilgileri</h3>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fas fa-map-marker-alt me-2 mt-1"></i> Adres</h5>
+                    <p class="ms-4 opacity-75">
+                        @ViewBag.ContactInfo["Address"]
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fas fa-phone me-2"></i> Telefon</h5>
+                    <p class="ms-4 opacity-75">@ViewBag.ContactInfo["Phone"]</p>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fas fa-envelope me-2"></i> E-Posta</h5>
+                    <p class="ms-4 opacity-75">@ViewBag.ContactInfo["Email"]</p>
+                </div>
+
+                <div class="mt-5">
+                    <p class="small opacity-50">Sosyal Medya</p>
+                    <div class="d-flex gap-3">
+                        <a href="@ViewBag.SocialMedia["Facebook"]" class="text-white" target="_blank"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="@ViewBag.SocialMedia["Twitter"]" class="text-white" target="_blank"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="@ViewBag.SocialMedia["LinkedIn"]" class="text-white" target="_blank"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="@ViewBag.SocialMedia["Instagram"]" class="text-white" target="_blank"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h4 class="card-title fw-bold mb-4 text-dark">Mesaj Gönder</h4>
+                    <form method="post" asp-action="Contact">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Adınız</label>
+                                <input type="text" name="name" class="form-control" placeholder="Adınız" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Soyadınız</label>
+                                <input type="text" name="surname" class="form-control" placeholder="Soyadınız" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">E-Posta Adresiniz</label>
+                                <input type="email" name="email" class="form-control" placeholder="ornek@mail.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Konu</label>
+                                <input type="text" name="subject" class="form-control" placeholder="Mesajınızın konusu" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mesajınız</label>
+                                <textarea name="message" class="form-control" rows="5" placeholder="Bize iletmek istediğiniz mesaj..." required></textarea>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                                    <i class="fas fa-paper-plane me-2"></i> Gönder
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

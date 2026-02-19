@@ -1,0 +1,180 @@
+@model MailMarketing.Entity.Template
+@{
+    ViewData["Title"] = "Yeni Şablon Oluştur";
+}
+
+<style>
+    /* iOS Modern Tasarım Çizgileri */
+    body { background-color: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    .ios-header { padding: 30px 0 10px 0; }
+    .ios-title { font-size: 2.2rem; font-weight: 800; color: #000; letter-spacing: -1px; }
+
+    /* Düzenle Sayfasındaki Beyaz Kart Yapısı */
+    .edit-style-card {
+        background: #fff;
+        border-radius: 24px;
+        border: none;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
+        padding: 40px;
+        margin-top: 15px;
+    }
+
+    /* İkonlu Küçük Gri Başlıklar (Düzenle sayfasındaki gibi) */
+    .field-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #a1a1a6;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Sade ve Şık Giriş Alanı */
+    .ios-input-field {
+        border: none;
+        border-bottom: 1px solid #f2f2f7;
+        padding: 12px 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1c1c1e;
+        width: 100%;
+        margin-bottom: 35px;
+        background: transparent;
+        transition: border-color 0.2s;
+    }
+    .ios-input-field:focus { outline: none; border-bottom-color: #007aff; }
+
+    /* Buton Tasarımları */
+    .btn-ios-primary {
+        background-color: #34c759; /* iOS Yeşili */
+        color: #fff;
+        border-radius: 16px;
+        padding: 14px 40px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba(52, 199, 89, 0.2);
+    }
+    .btn-ios-primary:hover { transform: scale(1.03); opacity: 0.9; color: #fff; }
+
+    /* 🛠️ SUMMERNOTE ÖZELLEŞTİRME (WORD GÖRÜNÜMÜ) */
+    .note-editor.note-frame { border: 1px solid #f2f2f7 !important; border-radius: 15px !important; overflow: hidden; box-shadow: none !important; }
+    .note-toolbar { background-color: #fcfcfd !important; border-bottom: 1px solid #f2f2f7 !important; padding: 10px !important; }
+    .note-btn { background: white !important; border: 1px solid #eee !important; border-radius: 8px !important; margin-right: 2px !important; }
+    .note-editable { background: white !important; min-height: 450px; font-family: 'Inter', sans-serif; font-size: 15px; }
+</style>
+
+<div class="container py-4">
+    @* Sayfa Üst Başlığı *@
+    <div class="ios-header d-flex justify-content-between align-items-center">
+        <h1 class="ios-title">Yeni Şablon Oluştur</h1>
+        <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none fw-bold">
+            <i class="fas fa-times me-1"></i> İptal
+        </a>
+    </div>
+
+    <div class="edit-style-card">
+        <form id="templateForm" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            @* 1. Şablon Başlığı (Word'den gelirse dolu görünür) *@
+            <div class="mb-4">
+                <label class="field-label"><i class="fas fa-heading"></i> ŞABLON BAŞLIĞI</label>
+                <input name="Title" id="TemplateTitle" class="ios-input-field" 
+                       placeholder="Şablon ismini buraya yazın..." value="@Model?.Title" required />
+            </div>
+
+            @* 2. Summernote / Word Yapısı (Word içeriği buraya HTML olarak akar) *@
+            <div class="mb-4">
+                <label class="field-label"><i class="fas fa-code"></i> E-POSTA İÇERİĞİ</label>
+                <textarea id="summernote" name="Content">@Html.Raw(Model?.Content)</textarea> 
+            </div>
+
+            @* Kaydet Butonu *@
+            <div class="d-flex justify-content-end mt-5">
+                <button type="button" class="btn btn-ios-primary shadow" onclick="confirmTemplateSave()">
+                    <i class="fas fa-check-circle me-2"></i> Şablonu Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @* 🔥 Summernote Kütüphaneleri *@
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function() {
+            // 🔥 Summernote Word/Resim Odaklı Yapı
+            $('#summernote').summernote({
+                placeholder: 'E-posta içeriğini buraya tasarlayın. Word aktarımı yaptıysanız içerik buraya yüklenecektir...',
+                tabsize: 2,
+                height: 450,
+                lang: 'tr-TR',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                // Resimleri otomatik Base64'e çevirerek kaydeder
+                callbacks: {
+                    onImageUpload: function(files) {
+                        for(let i=0; i < files.length; i++) {
+                            uploadImage(files[i]);
+                        }
+                    }
+                }
+            });
+        });
+
+        function uploadImage(file) {
+            let reader = new FileReader();
+            reader.onloadend = function() {
+                $('#summernote').summernote('insertImage', reader.result);
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function confirmTemplateSave() {
+            const title = $('#TemplateTitle').val();
+            const content = $('#summernote').summernote('code');
+            const isEmpty = $('#summernote').summernote('isEmpty');
+
+            if (!title || isEmpty) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Eksik Bilgi!',
+                    text: 'Lütfen hem şablon başlığını hem de içeriği doldurduğunuzdan emin olun.',
+                    confirmButtonColor: '#007aff'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Kaydedilsin mi?',
+                text: "Hazırladığınız şablon sisteme kaydedilecektir.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#34c759',
+                cancelButtonColor: '#8e8e93',
+                confirmButtonText: 'Evet, Kaydet',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('templateForm').submit();
+                }
+            });
+        }
+    </script>
+}

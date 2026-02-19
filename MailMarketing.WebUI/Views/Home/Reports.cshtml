@@ -1,0 +1,177 @@
+@model List<MailMarketing.Entity.MailLog>
+
+@{
+    ViewData["Title"] = "Gönderim Raporları";
+}
+
+<div class="container-fluid mt-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form id="deleteForm" asp-action="DeleteLogs" method="post">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Gönderim Raporları</h5>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <div class="btn-group btn-group-sm shadow-sm" role="group">
+                        <button type="button" class="btn btn-outline-light active filter-btn" onclick="filterLogs('all', this)">Hepsi</button>
+                        <button type="button" class="btn btn-outline-success filter-btn" onclick="filterLogs('success', this)">Başarılı</button>
+                        <button type="button" class="btn btn-outline-danger filter-btn" onclick="filterLogs('error', this)">Hatalı</button>
+                    </div>
+
+                    <button type="button" onclick="confirmDelete()" class="btn btn-danger btn-sm shadow-sm">
+                        <i class="fas fa-trash me-1"></i> Seçilenleri Sil
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light text-secondary">
+                        <tr>
+                            <th width="40"><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                            <th>Alıcı E-Posta</th>
+                            <th>Kullanılan Şablon</th>
+                            <th>Tarih</th>
+                            <th>Durum</th>
+                            <th class="text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var log in Model)
+                            {
+                                <tr class="log-row @(log.IsSuccess ? "status-success" : "status-error")">
+                                    <td>
+                                        <input type="checkbox" name="logIds" value="@log.Id" class="form-check-input log-item">
+                                    </td>
+                                    <td class="fw-semibold text-dark">@log.Subscriber?.Email</td>
+                                    <td><span class="badge bg-light text-dark border">@log.Template?.Title</span></td>
+                                    <td class="text-muted">@log.SentDate.ToString("g")</td>
+                                    <td>
+                                        @if (log.IsSuccess)
+                                        {
+                                            <span class="badge bg-success shadow-sm px-3">Başarılı</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger shadow-sm px-3">Hata</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-info btn-sm text-white shadow-sm" onclick="viewDetail(@log.Id)">
+                                            <i class="fas fa-eye me-1"></i> Detay
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-info-circle fa-2x mb-2"></i><br>Henüz kayıt bulunamadı.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+@* MODAL VE DİĞER KISIMLAR AYNI KALIYOR *@
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-info-circle me-2"></i> Gönderim Detayı</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" id="modalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterLogs(status, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const rows = document.querySelectorAll('.log-row');
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = "";
+                } else if (status === 'success') {
+                    row.style.display = row.classList.contains('status-success') ? "" : "none";
+                } else if (status === 'error') {
+                    row.style.display = row.classList.contains('status-error') ? "" : "none";
+                }
+            });
+        }
+        document.getElementById('checkAll').onclick = function() {
+            var checkboxes = document.querySelectorAll('.log-item');
+            for (var checkbox of checkboxes) {
+                // Sadece görünür olanları seçmek istersen: if(checkbox.closest('tr').style.display !== 'none')
+                checkbox.checked = this.checked;
+            }
+        }
+        function confirmDelete() {
+            var checkedCount = document.querySelectorAll('.log-item:checked').length;
+            if (checkedCount === 0) {
+                alert("Lütfen önce silinecek kayıtları seç !");
+                return;
+            }
+            if (confirm(checkedCount + " adet raporu silmek istediğine emin misin?")) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+        function viewDetail(id) {
+            var myModal = new bootstrap.Modal(document.getElementById('detailModal'));
+            document.getElementById('modalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-info" role="status"></div></div>';
+            myModal.show();
+            
+            fetch('/Home/GetLogDetail/' + id)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modalBody').innerHTML = `
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item py-3"><strong><i class="fas fa-paper-plane me-2 text-primary"></i>Gönderen:</strong><p class="mb-0 mt-1 ms-4 text-muted">${data.sender}</p></div>
+                            <div class="list-group-item py-3"><strong><i class="fas fa-user me-2 text-info"></i>Alıcı:</strong><p class="mb-0 mt-1 ms-4 text-muted">${data.email}</p></div>
+                            <div class="list-group-item py-3"><strong><i class="fas fa-file-alt me-2 text-secondary"></i>Şablon:</strong><p class="mb-0 mt-1 ms-4 text-muted">${data.template}</p></div>
+                            <div class="list-group-item py-3"><strong><i class="fas fa-calendar-alt me-2 text-warning"></i>Tarih:</strong><p class="mb-0 mt-1 ms-4 text-muted">${data.date}</p></div>
+                            <div class="list-group-item py-3"><strong><i class="fas fa-check-circle me-2 text-success"></i>Durum:</strong><p class="mb-0 mt-1 ms-4 fw-bold">${data.status}</p></div>
+                        </div>
+                        <div class="p-3 bg-light text-center border-top">
+                            <small class="text-muted">Kayıt ID: <strong>#${id}</strong></small>
+                        </div>
+                    `;
+                })
+                .catch(err => {
+                    document.getElementById('modalBody').innerHTML = '<div class="alert alert-danger m-3">Veri yüklenirken bir hata oluştu !</div>';
+                });
+        }
+    </script>
+}

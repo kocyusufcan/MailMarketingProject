@@ -1,0 +1,318 @@
+@model List<MailMarketing.Entity.MailLog>
+@{
+    ViewData["Title"] = "Gönderim Raporları";
+    var templates = ViewBag.Templates as List<MailMarketing.Entity.Template> ?? new List<MailMarketing.Entity.Template>();
+}
+
+<style>
+    /* --- MODERN SAAS UI DEĞİŞKENLERİ --- */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        --success-bg: #dcfce7;
+        --success-text: #15803d;
+        --error-bg: #fee2e2;
+        --error-text: #b91c1c;
+    }
+
+    body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+
+    .page-header { padding: 30px 0; }
+    .page-title { font-size: 2rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+    
+    .web-card { 
+        background: white; border-radius: 24px; border: 1px solid #f1f5f9; 
+        box-shadow: var(--card-shadow); margin-bottom: 25px; overflow: hidden; 
+    }
+
+    .filter-group { padding: 25px; background: #fff; }
+    .label-custom { font-weight: 600; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block; }
+    .input-custom { 
+        width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 10px 15px; 
+        font-size: 0.9rem; transition: all 0.2s; background: #fcfcfd; 
+    }
+    .input-custom:focus { border-color: #6366f1; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+
+    .table-saas thead th { 
+        background: #f8fafc; border: none; font-weight: 700; text-transform: uppercase; 
+        font-size: 0.7rem; letter-spacing: 1px; color: #64748b; padding: 15px 20px; 
+    }
+    
+    /* 🔥 AKILLI SATIR STİLLERİ */
+    .table-saas tbody tr { cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; }
+    .table-saas tbody tr:hover { background-color: #f8faff !important; }
+    
+    /* 🔵 SEÇİLEN SATIR GÖRÜNÜMÜ */
+    .table-saas tbody tr.is-selected {
+        background-color: #f0f7ff !important;
+        border-left-color: #6366f1;
+    }
+
+    .table-saas tbody td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .badge-saas { 
+        padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; 
+        display: inline-flex; align-items: center; gap: 6px; 
+    }
+    .badge-success { background: var(--success-bg); color: var(--success-text); }
+    .badge-error { background: var(--error-bg); color: var(--error-text); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .btn-saas { border-radius: 12px; padding: 10px 20px; font-weight: 600; border: none; transition: all 0.2s; font-size: 0.9rem; }
+    .btn-saas-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+    .btn-saas-secondary { background: #fff; border: 1.5px solid #e2e8f0; color: #475569; cursor: pointer; }
+    .btn-saas-danger { background: #fff; border: 1.5px solid #fee2e2; color: #b91c1c; }
+    .btn-saas-bulk { background: #b91c1c; color: white; box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2); }
+
+    .report-avatar {
+        width: 38px; height: 38px; background: #eef2ff; color: #6366f1;
+        border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.85rem;
+    }
+</style>
+
+<div class="container py-4">
+    @* 📱 Üst Başlık ve Hızlı İşlemler *@
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="page-title mb-1">Gönderim Raporları</h1>
+            <p class="text-muted small mb-0">Toplam <b>@ViewBag.TotalRecords</b> adet kayıt listeleniyor.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" id="btnBulkDelete" class="btn-saas btn-saas-bulk shadow-sm" style="display:none;" onclick="confirmBulkDelete()">
+                <i class="fas fa-trash-alt me-2"></i> Seçilenleri Sil (<span id="selectedCount">0</span>)
+            </button>
+
+            <button type="button" class="btn-saas btn-saas-secondary shadow-sm" onclick="exportToExcel()">
+                <i class="fas fa-file-excel me-2 text-success"></i> Excel'e Aktar
+            </button>
+            <button class="btn-saas btn-saas-danger shadow-sm" onclick="confirmClearLogs()">
+                <i class="fas fa-broom me-2"></i> Geçmişi Temizle
+            </button>
+        </div>
+    </div>
+
+    @* 🔍 Filtreleme Paneli *@
+    <div class="web-card">
+        <div class="filter-group">
+            <form action="/MailLog/Index" method="get" class="row g-3 align-items-end" id="filterForm">
+                <div class="col-lg-3 col-md-6">
+                    <label class="label-custom">Abone Ara</label>
+                    <input type="text" name="search" class="input-custom" placeholder="İsim veya mail..." value="@ViewBag.Search">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="label-custom">Şablon</label>
+                    <select name="templateId" class="input-custom">
+                        <option value="">Tümü</option>
+                        @foreach (var t in templates) {
+                            <option value="@t.Id" selected="@(ViewBag.SelectedTemplateId == t.Id)">@t.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="label-custom">Sonuç</label>
+                    <select name="status" class="input-custom">
+                        <option value="">Tümü</option>
+                        <option value="success" selected="@(ViewBag.CurrentStatus == "success")">Başarılı</option>
+                        <option value="error" selected="@(ViewBag.CurrentStatus == "error")">Hatalı</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-12">
+                    <label class="label-custom">Tarih Aralığı</label>
+                    <div class="input-group">
+                        <input type="date" name="startDate" class="input-custom" style="border-radius: 12px 0 0 12px;" value="@ViewBag.StartDate">
+                        <input type="date" name="endDate" class="input-custom" style="border-radius: 0 12px 12px 0; border-left: none;" value="@ViewBag.EndDate">
+                    </div>
+                </div>
+                <div class="col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn-saas btn-saas-primary w-100"><i class="fas fa-filter me-2"></i> Filtrele</button>
+                    <a href="/MailLog/Index" class="btn-saas btn-saas-secondary" title="Sıfırla"><i class="fas fa-sync-alt"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* 📄 Rapor Listesi *@
+    <form id="bulkDeleteForm" action="/MailLog/BulkDelete" method="post">
+        <div class="web-card">
+            <div class="table-responsive">
+                <table class="table table-saas align-middle mb-0" id="logTable">
+                    <thead>
+                        <tr>
+                            <th width="40"><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                            <th>Alıcı Bilgisi</th>
+                            <th>Şablon</th>
+                            <th>Gönderim Tarihi</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var log in Model)
+                            {
+                                var initials = log.Subscriber != null ? (log.Subscriber.FirstName?[0].ToString() + log.Subscriber.LastName?[0].ToString()).ToUpper() : "??";
+                                <tr class="log-row">
+                                    <td><input type="checkbox" name="logIds" class="form-check-input log-checkbox" value="@log.Id"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="report-avatar">@initials</div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@(log.Subscriber != null ? log.Subscriber.FirstName + " " + log.Subscriber.LastName : "Bilinmeyen")</div>
+                                                <div class="text-muted small">@log.Subscriber?.Email</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-2 py-1 rounded-pill small">
+                                            <i class="fas fa-file-alt me-1 text-indigo"></i> @log.Template?.Title
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="text-slate-700 fw-medium small">@log.SentDate.ToString("dd.MM.yyyy")</div>
+                                        <div class="text-muted x-small">@log.SentDate.ToString("HH:mm")</div>
+                                    </td>
+                                    <td>
+                                        @if (log.IsSuccess) {
+                                            <span class="badge-saas badge-success"><span class="dot bg-success"></span> Başarılı</span>
+                                        } else {
+                                            <span class="badge-saas badge-error" title="@log.ErrorMessage"><span class="dot bg-danger"></span> Hatalı</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-link text-danger p-0 delete-btn" onclick="confirmDeleteLog(@log.Id)"><i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Kayıt bulunamadı.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+
+    @* 🔥 AKILLI SAYFALAMA (Parametre Korumalı) *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav class="mt-4 mb-5">
+            <ul class="pagination justify-content-center gap-2">
+                @{
+                    int cur = ViewBag.CurrentPage;
+                    int total = ViewBag.TotalPages;
+                    int gap = 2;
+                }
+                <li class="page-item @(cur == 1 ? "disabled" : "")">
+                    <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
+                       style="width: 40px; height: 40px;"
+                       href="@Url.Action("Index", new { page = cur - 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">
+                        <i class="fas fa-chevron-left small"></i>
+                    </a>
+                </li>
+                @for (int i = 1; i <= total; i++) {
+                     @if (i == 1 || i == total || (i >= cur - gap && i <= cur + gap)) {
+                        <li class="page-item @(i == cur ? "active" : "")">
+                            <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold @(i == cur ? "bg-primary text-white" : "text-dark bg-white")"
+                               style="width: 40px; height: 40px;" href="@Url.Action("Index", new { page = i, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">@i</a>
+                        </li>
+                     } else if (i == cur - gap - 1 || i == cur + gap + 1) {
+                        <li class="page-item disabled"><span class="page-link border-0 bg-transparent text-muted">...</span></li>
+                     }
+                }
+                <li class="page-item @(cur == total ? "disabled" : "")">
+                    <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
+                       style="width: 40px; height: 40px;"
+                       href="@Url.Action("Index", new { page = cur + 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">
+                        <i class="fas fa-chevron-right small"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@* --- DETAY MODALI --- *@
+<div class="modal fade" id="logDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>Gönderim Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body px-4 pb-4" id="logDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            
+            // 🔥 AKILLI TIKLAMA YÖNETİCİSİ
+            $('.table-saas tbody tr.log-row').on('click', function(e) {
+                // Link, buton veya checkbox'ın kendisine tıklandıysa işlemi durdur
+                if ($(e.target).closest('.log-checkbox, .delete-btn, input, .badge, .status-toggle-link').length) return;
+
+                const checkbox = $(this).find('.log-checkbox');
+                const anyChecked = $('.log-checkbox:checked').length > 0;
+
+                if (anyChecked) {
+                    // 1️⃣ SEÇİM MODU: Detay açma, sadece seçimi değiştir
+                    checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+                } else {
+                    // 2️⃣ İNCELEME MODU: Detay modalını aç
+                    const logId = checkbox.val();
+                    $.get('/MailLog/GetLogDetail/' + logId, function(data) {
+                        $('#logDetailBody').html(data);
+                        new bootstrap.Modal(document.getElementById('logDetailModal')).show();
+                    });
+                }
+            });
+
+            // ⚙️ CHECKBOX DEĞİŞİNCE GÖRSEL EFEKT VE BUTONLARI YÖNET
+            $(document).on('change', '.log-checkbox', function() {
+                const count = $('.log-checkbox:checked').length;
+                const display = count > 0 ? 'inline-block' : 'none';
+                
+                $('#btnBulkDelete').css('display', display);
+                $('#selectedCount').text(count);
+
+                // Seçilen satıra görsel efekt ver
+                $(this).closest('tr').toggleClass('is-selected', this.checked);
+            });
+
+            // TÜMÜNÜ SEÇ
+            $('#checkAll').on('change', function() {
+                const isChecked = this.checked;
+                $('.log-checkbox').each(function() {
+                    $(this).prop('checked', isChecked).trigger('change');
+                });
+            });
+        });
+
+        // Diğer Fonksiyonlar (BulkDelete, Excel, ClearAll, SingleDelete)
+        function confirmBulkDelete() {
+            const count = $('.log-checkbox:checked').length;
+            Swal.fire({ title: 'Emin misiniz?', text: `${count} adet rapor silinecek.`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', confirmButtonText: 'Evet, Sil!' })
+            .then((result) => { if (result.isConfirmed) document.getElementById('bulkDeleteForm').submit(); });
+        }
+
+        function exportToExcel() {
+            window.location.href = `/MailLog/ExportToExcel?search=${encodeURIComponent($('input[name="search"]').val())}&templateId=${$('select[name="templateId"]').val()}&status=${$('select[name="status"]').val()}&startDate=${$('input[name="startDate"]').val()}&endDate=${$('input[name="endDate"]').val()}`;
+        }
+
+        function confirmClearLogs() {
+            Swal.fire({ title: 'Emin misiniz?', text: "Tüm geçmiş silinecek!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', confirmButtonText: 'Evet, Temizle!' })
+            .then((result) => { if (result.isConfirmed) location.href = '/MailLog/ClearAll'; });
+        }
+
+        function confirmDeleteLog(id) {
+            Swal.fire({ title: 'Silinsin mi?', text: "Bu kayıt silinecek.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sil' })
+            .then((r) => { if(r.isConfirmed) location.href = '/MailLog/Delete/' + id; });
+        }
+    </script>
+}

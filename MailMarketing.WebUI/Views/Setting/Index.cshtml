@@ -1,0 +1,190 @@
+@model MailMarketing.Entity.Setting
+@{
+    ViewData["Title"] = "SMTP Yapılandırması";
+}
+
+<style>
+    /* --- MODERN SAAS UI DEĞİŞKENLERİ --- */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --surface-color: #ffffff;
+        --bg-color: #f8fafc;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+    }
+
+    body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: var(--text-main); }
+
+    /* Üst Banner */
+    .settings-banner {
+        background: var(--primary-gradient);
+        border-radius: 24px; padding: 40px; color: white; margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2); position: relative; overflow: hidden;
+    }
+    .settings-banner::before {
+        content: ""; position: absolute; left: -30px; bottom: -30px;
+        width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;
+    }
+
+    /* Kart Yapısı */
+    .web-card {
+        background: var(--surface-color); border: 1px solid var(--border-color);
+        border-radius: 20px; padding: 30px; height: 100%; transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+    .web-card:hover { border-color: #6366f1; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+    /* Input Tasarımı */
+    .form-group-custom { margin-bottom: 20px; }
+    .label-custom { font-weight: 700; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-custom {
+        width: 100%; border: 1.5px solid var(--border-color); border-radius: 12px;
+        padding: 12px 15px; font-size: 0.95rem; transition: all 0.2s; background: #fcfcfd; color: #334155;
+    }
+    .input-custom:focus { border-color: #6366f1; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+
+    /* Bilgi Kutucuğu */
+    .info-box {
+        background: #eef2ff; border: 1px solid #c7d2fe; color: #4338ca;
+        border-radius: 12px; padding: 15px; font-size: 0.9rem; display: flex; gap: 10px; align-items: flex-start;
+    }
+
+    /* Toggle Switch */
+    .form-check-input {
+        width: 50px; height: 26px; cursor: pointer; background-color: #e2e8f0; border: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+    .form-check-input:checked { background-color: #6366f1; border-color: #6366f1; }
+
+    /* Aksiyon Alanı */
+    .action-area {
+        margin-top: 30px; background: white; border-radius: 24px; padding: 30px;
+        border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
+    }
+    
+    .btn-save-settings {
+        background: var(--primary-gradient); color: white; border: none;
+        border-radius: 16px; padding: 16px 50px; font-weight: 700; font-size: 1.1rem;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 10px;
+    }
+    .btn-save-settings:hover { filter: brightness(1.1); transform: scale(1.02); }
+</style>
+
+<div class="container py-4">
+    
+    @* 🚀 Üst Banner *@
+    <div class="settings-banner">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold mb-2">SMTP Ayarları</h1>
+                <p class="mb-0 opacity-75">Mail gönderim sunucunuzu yapılandırın ve bağlantıyı test edin.</p>
+            </div>
+            <div class="d-none d-md-block">
+                <i class="fas fa-server fa-4x opacity-25"></i>
+            </div>
+        </div>
+    </div>
+
+    <form action="/Setting/Update" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="row g-4">
+            
+            @* SOL: Sunucu Bağlantısı *@
+            <div class="col-lg-6">
+                <div class="web-card">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-network-wired me-2 text-indigo"></i> Sunucu Bağlantısı</h5>
+                    
+                    <div class="form-group-custom">
+                        <label class="label-custom">SMTP Sunucu Adresi</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-light rounded-start-3 ps-3"><i class="fas fa-globe text-muted"></i></span>
+                            @* 🔥 FİX 1: Server yerine MailServer *@
+                            <input type="text" name="MailServer" value="@Model.MailServer" class="input-custom border-start-0 rounded-start-0" placeholder="smtp.gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group-custom">
+                                <label class="label-custom">Port Numarası</label>
+                                <input type="number" name="Port" value="@Model.Port" class="input-custom" placeholder="587" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-custom">
+                                <label class="label-custom">Güvenlik (SSL/TLS)</label>
+                                <div class="d-flex align-items-center h-100 p-2 border rounded-3 bg-light">
+                                    <div class="form-check form-switch mb-0 ms-2">
+                                        @* 🔥 FİX 2: UseSsl yerine EnableSSL (Büyük harf dikkat!) *@
+                                        <input class="form-check-input" type="checkbox" name="EnableSSL" id="sslSwitch" value="true" @(Model.EnableSSL ? "checked" : "")>
+                                        <label class="form-check-label ms-2 fw-bold text-muted small" for="sslSwitch">Aktif</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* SAĞ: Hesap Bilgileri *@
+            <div class="col-lg-6">
+                <div class="web-card">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-user-shield me-2 text-indigo"></i> Hesap Bilgileri</h5>
+
+                    <div class="info-box mb-4">
+                        <i class="fas fa-info-circle fa-lg mt-1"></i>
+                        <div>
+                            <strong>Önemli:</strong> Gmail kullanıyorsanız, normal şifreniz yerine "Uygulama Şifresi" kullanmalısınız.
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="label-custom">Gönderici E-Posta</label>
+                        <input type="email" name="Email" value="@Model.Email" class="input-custom" placeholder="ornek@sirket.com" required>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="label-custom">Uygulama Şifresi</label>
+                        <div class="position-relative">
+                            <input type="password" name="Password" value="@Model.Password" class="input-custom pe-5" id="smtpPass" placeholder="••••••••••••" required>
+                            <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted" onclick="togglePass()">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Alt Aksiyon Alanı *@
+        <div class="action-area">
+            <button type="submit" class="btn-save-settings">
+                <i class="fas fa-check-circle"></i> Ayarları Güncelle
+            </button>
+            <p class="text-muted x-small mt-3 mb-0">
+                <i class="fas fa-lock me-1"></i> Bu bilgiler veritabanında şifreli olarak saklanmaktadır.
+            </p>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePass() {
+            const input = document.getElementById('smtpPass');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+}

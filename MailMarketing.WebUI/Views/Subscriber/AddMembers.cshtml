@@ -1,0 +1,224 @@
+@using MailMarketing.Entity
+@model List<Subscriber>
+@{
+    var group = ViewBag.Group as SubscriberGroup;
+    ViewData["Title"] = "Klasöre Abone Seç";
+}
+
+<style>
+    /* 🔵 SEÇİLEN SATIR STİLİ */
+    tbody tr { cursor: pointer; transition: all 0.2s; }
+    tbody tr.is-selected {
+        background-color: #f0f7ff !important;
+        box-shadow: inset 4px 0 0 0 #6366f1;
+    }
+    .pagination .page-link { transition: all 0.2s; border-radius: 10px; margin: 0 2px; }
+    .pagination .page-item.active .page-link { background-color: #6366f1 !important; border-color: #6366f1; }
+    
+    /* Sticky Header: Sayfa aşağı kaysa bile tablo başlığı en üstte kalsın */
+    .sticky-header th {
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 100;
+        box-shadow: inset 0 -1px 0 #dee2e6;
+    }
+</style>
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Subscriber/Groups" class="text-decoration-none text-muted">Klasörler</a></li>
+        <li class="breadcrumb-item"><a href="/Subscriber/GroupDetails?groupId=@group?.Id" class="text-decoration-none text-muted">@group?.GroupName</a></li>
+        <li class="breadcrumb-item active fw-bold text-primary">Abone Ekle</li>
+      </ol>
+    </nav>
+
+    <div class="card shadow-lg border-0 mb-5" style="border-radius: 25px; overflow: hidden;">
+        <div class="card-header bg-primary text-white p-4 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2"></i>@group?.GroupName</h4>
+                    <small class="opacity-75">Eklemek istediğiniz aboneleri listeden seçin</small>
+                </div>
+                <a href="/Subscriber/GroupDetails?groupId=@group?.Id" onclick="clearSelectionStorage()" class="btn btn-light btn-sm rounded-pill px-4 fw-bold">
+                    <i class="fas fa-times me-1"></i> Vazgeç
+                </a>
+            </div>
+        </div>
+        
+        <div class="p-4 bg-light border-bottom">
+            <form method="get" class="row g-2">
+                <input type="hidden" name="groupId" value="@group?.Id" />
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0 ps-3 rounded-start-pill shadow-sm"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="searchString" class="form-control border-0 shadow-sm rounded-end-pill py-2" placeholder="İsim, soyisim veya e-posta ile ara..." value="@ViewBag.SearchString">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill shadow-sm fw-bold">Filtrele</button>
+                </div>
+            </form>
+        </div>
+
+        @* 🔥 Form Submit Edilmeden Önce Hafızadaki Tüm ID'leri Gizli Input Olarak Ekleyeceğiz *@
+        <form asp-action="SaveMembersToGroup" method="post" id="selectionForm">
+            <input type="hidden" name="groupId" value="@group?.Id" />
+            
+            <div class="table-responsive">
+                @* DÜZELTME: max-height ve overflow kaldırıldı, sayfa scrollu kullanılacak *@
+                <table class="table table-hover align-middle mb-0" id="selectionTable">
+                    <thead class="sticky-header">
+                        <tr>
+                            <th class="ps-4" width="60">
+                                <input type="checkbox" id="selectAllSubs" class="form-check-input">
+                            </th>
+                            <th class="py-3">Abone Bilgisi</th>
+                            <th>E-Posta Adresi</th>
+                            <th class="text-center">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var item in Model) {
+                            <tr data-id="@item.Id">
+                                <td class="ps-4">
+                                    <input type="checkbox" value="@item.Id" class="form-check-input sub-check">
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.FirstName @item.LastName</div>
+                                </td>
+                                <td><span class="text-muted">@item.Email</span></td>
+                                <td class="text-center">
+                                    <span class="badge @(item.IsActive ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger") rounded-pill px-3">
+                                        @(item.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="p-3 border-top bg-light text-center">
+                    <small class="text-muted d-block mb-2">Hafızadaki toplam seçim: <strong id="totalStoredCount">0</strong> kişi</small>
+                    <nav>
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            @{ int cur = ViewBag.CurrentPage; int total = ViewBag.TotalPages; }
+                            <li class="page-item @(cur == 1 ? "disabled" : "")">
+                                <a class="page-link" href="?groupId=@group?.Id&searchString=@ViewBag.SearchString&page=@(cur - 1)"><i class="fas fa-chevron-left"></i></a>
+                            </li>
+                            @for (int i = 1; i <= total; i++) {
+                                <li class="page-item @(cur == i ? "active" : "")">
+                                    <a class="page-link" href="?groupId=@group?.Id&searchString=@ViewBag.SearchString&page=@i">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(cur == total ? "disabled" : "")">
+                                <a class="page-link" href="?groupId=@group?.Id&searchString=@ViewBag.SearchString&page=@(cur + 1)"><i class="fas fa-chevron-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+            
+            <div class="card-footer bg-white p-4 border-0 text-center shadow-lg" style="position: sticky; bottom: 0; z-index: 100;">
+                <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-lg" id="submitBtn">
+                    <i class="fas fa-save me-2"></i> Seçilenleri (<span id="countText">0</span>) Klasöre Ekle
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const STORAGE_KEY = "selected_subscriber_ids";
+
+        $(document).ready(function() {
+            // 1. Sayfa yüklendiğinde hafızadaki seçimleri tabloya uygula
+            restoreSelection();
+
+            // 2. Satıra tıklandığında checkbox'ı tetikle
+            $('#selectionTable tbody tr').on('click', function(e) {
+                if ($(e.target).closest('input').length) return;
+                const checkbox = $(this).find('.sub-check');
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            });
+
+            // 3. Checkbox her değiştiğinde hafızayı güncelle
+            $(document).on('change', '.sub-check', function() {
+                const id = $(this).val();
+                let selectedIds = getStoredIds();
+
+                if (this.checked) {
+                    selectedIds.push(id);
+                    $(this).closest('tr').addClass('is-selected');
+                } else {
+                    selectedIds = selectedIds.filter(item => item !== id);
+                    $(this).closest('tr').removeClass('is-selected');
+                }
+
+                saveStoredIds(selectedIds);
+                updateUI();
+            });
+
+            // 4. Tümünü seç (Sadece bu sayfadakiler için)
+            $('#selectAllSubs').on('change', function() {
+                $('.sub-check').prop('checked', this.checked).trigger('change');
+            });
+
+            // 5. Kaydet butonuna basınca hafızadaki tüm ID'leri formla gönder
+            $('#selectionForm').on('submit', function() {
+                const finalIds = getStoredIds();
+                const form = $(this);
+                
+                // Formdaki eski checkboxları temizlemiyoruz, ancak hafızadakileri gizli input olarak ekliyoruz
+                // (Mevcut sayfadakiler zaten formda olduğu için onları tekrar eklemeye gerek yok ama kafa karışmasın diye hepsini temizleyip baştan eklemek en garantisi)
+                form.find('input[name="subscriberIds"]').remove(); 
+                
+                finalIds.forEach(id => {
+                    form.append($('<input>').attr('type', 'hidden').attr('name', 'subscriberIds').val(id));
+                });
+
+                // İşlem bitince hafızayı temizle
+                clearSelectionStorage();
+            });
+        });
+
+        // YARDIMCI FONKSİYONLAR
+        function getStoredIds() {
+            const data = sessionStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveStoredIds(ids) {
+            // Duplicate (çiftleme) kontrolü
+            const uniqueIds = [...new Set(ids)];
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(uniqueIds));
+        }
+
+        function restoreSelection() {
+            const storedIds = getStoredIds();
+            $('.sub-check').each(function() {
+                if (storedIds.includes($(this).val())) {
+                    $(this).prop('checked', true);
+                    $(this).closest('tr').addClass('is-selected');
+                }
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            const count = getStoredIds().length;
+            $('#countText').text(count);
+            $('#totalStoredCount').text(count);
+            $('#submitBtn').prop('disabled', count === 0);
+        }
+
+        function clearSelectionStorage() {
+            sessionStorage.removeItem(STORAGE_KEY);
+        }
+    </script>
+}

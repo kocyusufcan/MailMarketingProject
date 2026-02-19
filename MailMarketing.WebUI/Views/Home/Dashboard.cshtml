@@ -1,0 +1,715 @@
+﻿@{
+    ViewData["Title"] = "Kontrol Paneli";
+}
+
+<style>
+    /* --- MODERN SAAS UI DEĞİŞKENLERİ --- */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        --surface-color: #ffffff;
+        --bg-color: #f8fafc;
+    }
+
+    body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: #1e293b; }
+
+    /* Kart Tasarımı */
+    .web-card {
+        background: white; border-radius: 24px; border: 1px solid #f1f5f9;
+        box-shadow: var(--card-shadow); margin-bottom: 25px; overflow: hidden;
+        transition: all 0.3s ease; height: 100%;
+    }
+    .web-card:hover { border-color: #6366f1; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(99, 102, 241, 0.1); }
+
+    /* İstatistik Kartları */
+    .stat-card { padding: 25px; display: flex; align-items: center; justify-content: space-between; height: 100%; }
+    .stat-icon {
+        width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.6rem; margin-right: 15px;
+    }
+    .bg-soft-indigo { background: #e0e7ff; color: #4338ca; }
+    .bg-soft-emerald { background: #d1fae5; color: #059669; }
+    .bg-soft-amber { background: #fef3c7; color: #d97706; }
+
+    /* Adım Rozetleri */
+    .step-badge {
+        width: 32px; height: 32px; background: var(--primary-gradient); color: white;
+        border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+    .card-label { font-weight: 700; color: #1e293b; font-size: 1.1rem; }
+
+    /* Input & Select */
+    .input-saas {
+        width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 15px;
+        font-size: 0.95rem; background: #fcfcfd; transition: all 0.2s;
+    }
+    .input-saas:focus { border-color: #6366f1; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+
+    /* Scrollable List */
+    .scrollable-list { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+    .scrollable-list::-webkit-scrollbar { width: 5px; }
+    .scrollable-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    .list-item {
+        padding: 10px 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+        border: 1px solid transparent; display: flex; align-items: center;
+    }
+    .list-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+    .list-item.active-group { background: #eef2ff; border-color: #6366f1; color: #4338ca; font-weight: 600; }
+    .list-item.active-template { background: #f0fdfa; border-color: #0d9488; color: #0f766e; font-weight: 600; }
+
+    /* 🔥 Tablo Satır Tıklama Tasarımı */
+    .subscriber-row { cursor: pointer; transition: all 0.2s; }
+    .subscriber-row:hover { background-color: #f1f5f9 !important; }
+    .subscriber-row.row-selected { background-color: #eef2ff !important; }
+
+    .table-saas thead th { background: #f8fafc; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: #64748b; padding: 15px 20px; border: none; }
+    .table-saas tbody td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    
+    /* Aksiyon Butonu */
+    .action-area {
+        background: white; border-radius: 24px; padding: 30px; border: 1px solid #e2e8f0;
+        text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); margin-top: 30px;
+    }
+    .btn-send-main {
+        background: var(--primary-gradient); color: white; border: none; border-radius: 16px;
+        padding: 18px 60px; font-weight: 700; font-size: 1.1rem;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 10px;
+    }
+    .btn-send-main:hover { transform: scale(1.02); filter: brightness(1.1); }
+    /* Pagination Style */
+    .pagination-custom .page-link {
+        border: none;
+        color: #64748b;
+        background: transparent;
+        border-radius: 8px;
+        margin: 0 3px;
+        font-weight: 600;
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .pagination-custom .page-link:hover {
+        background: #f1f5f9;
+        color: #6366f1;
+    }
+    .pagination-custom .page-item.active .page-link {
+        background: #6366f1;
+        color: white;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+    .pagination-custom .page-item.disabled .page-link {
+        color: #cbd5e1;
+        pointer-events: none;
+    }
+</style>
+
+<div class="container py-4">
+    
+    @* --- 🚀 1. BAŞLIK VE İSTATİSTİKLER --- *@
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="fw-bold mb-1" style="font-size: 2rem; letter-spacing: -0.5px;">Kontrol Paneli</h1>
+            <p class="text-muted mb-0">Hoş geldiniz, güncel istatistikleriniz ve hızlı gönderim ekranınız.</p>
+        </div>
+        <div>
+            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
+                <i class="fas fa-calendar-alt me-2 text-muted"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <a href="/Subscriber/Index" class="text-decoration-none h-100 d-block">
+                <div class="web-card stat-card">
+                    <div>
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Toplam Abone</h6>
+                        <h2 class="fw-extrabold mb-0 text-dark display-6">@ViewBag.TotalSubscribers</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-indigo"><i class="fas fa-users"></i></div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="/Template/Index" class="text-decoration-none h-100 d-block">
+                <div class="web-card stat-card">
+                    <div>
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Hazır Şablon</h6>
+                        <h2 class="fw-extrabold mb-0 text-dark display-6">@ViewBag.TotalTemplates</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-emerald"><i class="fas fa-layer-group"></i></div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="/MailLog/Index" class="text-decoration-none h-100 d-block">
+                <div class="web-card stat-card">
+                    <div>
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Toplam Gönderim</h6>
+                        <h2 class="fw-extrabold mb-0 text-dark display-6">@ViewBag.TotalMailsSent</h2>
+                        <div class="text-success small fw-bold mt-1">
+                            <i class="fas fa-chart-pie me-1"></i> %@ViewBag.SuccessRate Başarı
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-soft-amber"><i class="fas fa-paper-plane"></i></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    @* --- 📉 2. PERFORMANS GRAFİĞİ --- *@
+    <div class="web-card p-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0"><i class="fas fa-chart-line me-2 text-indigo"></i> Haftalık Gönderim Analizi</h5>
+            <button class="btn btn-sm btn-light border rounded-pill px-3"><i class="fas fa-sync-alt me-1"></i> Yenile</button>
+        </div>
+        <div style="height: 320px;"><canvas id="mailPerformanceChart"></canvas></div>
+    </div>
+
+    @* --- 🚀 3. GÖNDERİM SİHİRBAZI --- *@
+    <form id="mailForm" action="/Home/SendMail" method="post">
+        <div class="row g-4 mb-4">
+            
+            @* ADIM 1: Şablon Seçimi (AJAX ile yüklenir) *@
+            <div class="col-lg-6">
+                <div class="web-card p-4 h-100">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="step-badge">1</div>
+                        <div>
+                            <h5 class="card-label mb-0">Şablon Seçimi</h5>
+                            <p class="text-muted x-small mb-0">Gönderilecek e-posta tasarımını belirleyin.</p>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="templateId" id="finalTemplateId" required>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3 text-muted"><i class="fas fa-search"></i></span>
+                        <input type="text" id="templateSearchInput" class="input-saas border-start-0 rounded-start-0" placeholder="Şablon ara...">
+                    </div>
+
+                    <div class="scrollable-list" id="templateList">
+                        <div class="text-center text-muted py-4 small">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Yükleniyor...
+                        </div>
+                    </div>
+                    <div id="templatePagination" class="mt-3"></div>
+                </div>
+            </div>
+
+            @* ADIM 2: Hedef Kitle (AJAX ile yüklenir) *@
+            <div class="col-lg-6">
+                <div class="web-card p-4 h-100">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="step-badge">2</div>
+                        <div>
+                            <h5 class="card-label mb-0">Hedef Kitle</h5>
+                            <p class="text-muted x-small mb-0">Hangi klasördeki kişilere gönderim yapılacak?</p>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3 text-muted"><i class="fas fa-search"></i></span>
+                        <input type="text" id="groupSearchInput" class="input-saas border-start-0 rounded-start-0" placeholder="Klasör ara...">
+                    </div>
+
+                    <div class="scrollable-list" id="dbGroupList">
+                        <div class="text-center text-muted py-4 small">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Yükleniyor...
+                        </div>
+                    </div>
+                    <div id="groupPagination" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        @* ADIM 3: Alıcı Tablosu (AJAX ile yüklenir) *@
+        <div class="web-card">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="step-badge">3</div>
+                    <div>
+                        <h5 class="card-label mb-0">Alıcı Listesi</h5>
+                        <p class="text-muted x-small mb-0" id="selectionStatusText">Aramak için yazın veya klasör seçin.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <input type="text" id="dashboardSearch" class="input-saas py-2" placeholder="İsim veya e-posta ara..." style="width: 220px;">
+                    <button type="button" class="btn btn-light border fw-bold text-muted" id="btnSelectAll" style="display:none;">Tümü</button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-saas align-middle mb-0" id="subscriberTable">
+                    <thead>
+                        <tr>
+                            <th width="50" class="text-center">Seç</th>
+                            <th>Abone Bilgisi</th>
+                            <th>E-Posta</th>
+                            <th class="text-center">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriberTableBody">
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fas fa-search fa-2x mb-3 d-block opacity-25"></i>
+                                Aramak için yukarıdaki kutuya yazın veya bir klasör seçin.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            @* Daha Fazla Yükle *@
+            @* Sayfalandırma *@
+            <div id="subscriberPagination" class="p-3 border-top"></div>
+        </div>
+
+        <input type="hidden" name="sendToAll" id="sendToAllInput" value="false">
+
+        @* --- 4. AKSİYON BUTONU --- *@
+        <div class="action-area">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <button type="button" class="btn-send-main" onclick="confirmMailSend()">
+                    <i class="fas fa-paper-plane"></i> Seçilenlere Gönder
+                </button>
+                <button type="button" class="btn btn-outline-primary rounded-4 px-4 py-3 fw-bold" style="border-width: 2px;" onclick="sendToAllMail()">
+                    <i class="fas fa-users me-2"></i> Tüm Abonelere Gönder
+                    <span class="badge bg-primary ms-2 rounded-pill">@ViewBag.TotalSubscribers</span>
+                </button>
+            </div>
+            <p class="text-muted x-small mt-3 mb-0">
+                <i class="fas fa-shield-alt me-1"></i> Gönderim işlemi sıraya alınacak ve arka planda işlenecektir.
+            </p>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        //  AJAX ALICI LİSTESİ SİSTEMİ
+        var subscriberCurrentPage = 1;
+        var subscriberTotalCount = 0;
+        var subscriberSearchTerm = '';
+        var subscriberGroupFilter = [];
+        var searchTimeout;
+        
+        // 🔥 SEÇİM KALICILIĞI İÇİN GLOBAL STATE
+        var selectedSubscriberIds = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Grafik Başlatma
+            const canvas = document.getElementById('mailPerformanceChart');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');   
+                gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @Html.Raw(ViewBag.ChartLabels ?? "[]"),
+                        datasets: [{
+                            label: 'Gönderilen Mail',
+                            data: @Html.Raw(ViewBag.ChartData ?? "[]"),
+                            borderColor: '#6366f1',
+                            backgroundColor: gradient,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#ffffff', pointRadius: 6, fill: true, tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { borderDash: [5, 5] }, beginAtZero: true }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            // 🔍 Arama kutusu - AJAX ile abone getir
+            document.getElementById('dashboardSearch').addEventListener('keyup', function() {
+                clearTimeout(searchTimeout);
+                var val = this.value.trim();
+                searchTimeout = setTimeout(function() {
+                    subscriberSearchTerm = val;
+                    loadSubscribers(1);
+                }, 400);
+            });
+
+            // Satır tıklama ile seçim (event delegation) - GÜNCELLENDİ
+            document.getElementById('subscriberTableBody').addEventListener('click', function (e) {
+                // Eğer doğrudan checkbox'a tıklandıysa, işlem yapma (change eventi yakalayacak)
+                if (e.target.classList.contains('sub-check')) return;
+
+                const row = e.target.closest('.subscriber-row');
+                if (row) {
+                    const checkbox = row.querySelector('.sub-check');
+                    if (checkbox) { 
+                        checkbox.checked = !checkbox.checked; 
+                        // Manuel tetikleme çünkü programatik değişim change eventini tetiklemez
+                        handleCheckboxChange(checkbox);
+                    }
+                }
+            });
+
+            // Checkbox Change Event Delegation
+            document.getElementById('subscriberTableBody').addEventListener('change', function(e) {
+                if (e.target.classList.contains('sub-check')) {
+                    handleCheckboxChange(e.target);
+                }
+            });
+
+            // Tümü seç butonu
+            document.getElementById('btnSelectAll').addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.sub-check');
+                // Şu anki sayfadaki tümü seçili mi kontrol et
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                
+                checkboxes.forEach(cb => {
+                    cb.checked = !allChecked;
+                    handleCheckboxChange(cb);
+                });
+                
+                updateSelectAllButtonState();
+            });
+
+            // 📋 Şablon ve Klasör arama kutuları
+            var templateTimeout, groupTimeout;
+
+            document.getElementById('templateSearchInput').addEventListener('keyup', function() {
+                clearTimeout(templateTimeout);
+                var val = this.value.trim();
+                templateTimeout = setTimeout(function() { 
+                    templateSearchTerm = val;
+                    loadTemplates(1); 
+                }, 300);
+            });
+
+            document.getElementById('groupSearchInput').addEventListener('keyup', function() {
+                clearTimeout(groupTimeout);
+                var val = this.value.trim();
+                groupTimeout = setTimeout(function() { 
+                    groupSearchTerm = val;
+                    loadGroups(1); 
+                }, 300);
+            });
+
+            // Sayfa açılışında şablon ve klasörleri yükle
+            loadTemplates(1);
+            loadGroups(1);
+            loadSubscribers(1); 
+        });
+
+        // 🔥 CHECKBOX DEĞİŞİM YÖNETİMİ
+        function handleCheckboxChange(checkbox) {
+            const id = parseInt(checkbox.value);
+            if (checkbox.checked) {
+                if (!selectedSubscriberIds.includes(id)) {
+                    selectedSubscriberIds.push(id);
+                }
+            } else {
+                const index = selectedSubscriberIds.indexOf(id);
+                if (index > -1) {
+                    selectedSubscriberIds.splice(index, 1);
+                }
+            }
+            updateSelectionText();
+            updateSelectAllButtonState();
+        }
+
+        function updateSelectAllButtonState() {
+            const btn = document.getElementById('btnSelectAll');
+            // Eğer sayfadaki tüm checkboxlar seçiliyse butonu 'Kaldır' yap
+            const checkboxes = document.querySelectorAll('.sub-check');
+            if (checkboxes.length === 0) return;
+
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            btn.innerText = allChecked ? 'Kaldır' : 'Tümü';
+            btn.className = allChecked ? 'btn btn-dark fw-bold' : 'btn btn-light border fw-bold text-muted';
+        }
+
+        // ==========================================
+        // 🛠 GENEL PAGINATION FONKSİYONU
+        // ==========================================
+        function renderPagination(containerId, currentPage, totalPages, onClickFunction) {
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<nav><ul class="pagination pagination-custom justify-content-center mb-0">';
+
+            // Önceki
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="${onClickFunction}(${currentPage - 1}); return false;">
+                            <i class="fas fa-chevron-left fa-xs"></i>
+                        </a>
+                     </li>`;
+
+            // Sayfa Numaraları
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            if (totalPages <= 5) {
+                startPage = 1; endPage = totalPages;
+            } else {
+                if (currentPage <= 3) { startPage = 1; endPage = 5; }
+                else if (currentPage >= totalPages - 2) { startPage = totalPages - 4; endPage = totalPages; }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="${onClickFunction}(${i}); return false;">${i}</a>
+                         </li>`;
+            }
+
+            // Sonraki
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="${onClickFunction}(${currentPage + 1}); return false;">
+                            <i class="fas fa-chevron-right fa-xs"></i>
+                        </a>
+                     </li>`;
+
+            html += '</ul></nav>';
+            container.innerHTML = html;
+        }
+
+        // 📡 AJAX: Abone Yükleme
+        function loadSubscribers(page) {
+            subscriberCurrentPage = page;
+            var params = new URLSearchParams({ term: subscriberSearchTerm, page: page });
+            if (subscriberGroupFilter.length > 0) params.append('groupIds', subscriberGroupFilter.join(','));
+
+            var tbody = document.getElementById('subscriberTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Yükleniyor...</td></tr>';
+
+            fetch('/Home/SearchSubscribersAjax?' + params.toString())
+                .then(r => r.json())
+                .then(res => {
+                    subscriberTotalCount = res.totalCount;
+                    tbody.innerHTML = '';
+
+                    if (res.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fas fa-inbox fa-2x mb-3 d-block opacity-25"></i>Sonuç bulunamadı.</td></tr>';
+                        document.getElementById('btnSelectAll').style.display = 'none';
+                        document.getElementById('subscriberPagination').innerHTML = ''; 
+                        return;
+                    }
+
+                    res.data.forEach(sub => {
+                        // Seçili mi kontrol et
+                        const isChecked = selectedSubscriberIds.includes(sub.id) ? 'checked' : '';
+
+                        var tr = document.createElement('tr');
+                        tr.className = 'subscriber-row';
+                        tr.innerHTML = `
+                            <td class="text-center">
+                                <input type="checkbox" value="${sub.id}" class="form-check-input sub-check" style="width: 18px; height: 18px;" ${isChecked}>
+                            </td>
+                            <td><div class="fw-bold text-dark">${sub.firstName} ${sub.lastName}</div></td>
+                            <td class="text-muted font-monospace small">${sub.email}</td>
+                            <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Aktif</span></td>`;
+                        tbody.appendChild(tr);
+                    });
+
+                    // Pagination
+                    const totalPages = Math.ceil(res.totalCount / res.pageSize);
+                    renderPagination('subscriberPagination', page, totalPages, 'loadSubscribers');
+
+                    document.getElementById('btnSelectAll').style.display = 'inline-block';
+                    updateSelectionText(); // Seçim metnini güncelle
+                    updateSelectAllButtonState(); // Tümü seç butonunu güncelle
+                });
+        }
+
+        // 📡 AJAX: Şablon Yükleme
+        var templateCurrentPage = 1;
+        var templateSearchTerm = '';
+
+        function loadTemplates(page) {
+            templateCurrentPage = page;
+            var container = document.getElementById('templateList');
+            container.innerHTML = '<div class="text-center text-muted py-4 small"><i class="fas fa-spinner fa-spin me-2"></i> Yükleniyor...</div>';
+            var url = '/Home/SearchTemplatesAjax?term=' + encodeURIComponent(templateSearchTerm) + '&page=' + page;
+            
+            fetch(url)
+                .then(r => r.json())
+                .then(res => {
+                    container.innerHTML = '';
+                    if (res.data.length === 0) {
+                        container.innerHTML = '<div class="text-center text-muted py-4 small"><i class="fas fa-inbox me-2"></i> Şablon bulunamadı.</div>';
+                        document.getElementById('templatePagination').innerHTML = '';
+                        return;
+                    }
+                    var selectedId = document.getElementById('finalTemplateId').value;
+                    res.data.forEach(t => {
+                        var isActive = selectedId == t.id;
+                        var div = document.createElement('div');
+                        div.className = 'list-item template-item' + (isActive ? ' active-template' : '');
+                        div.onclick = function() { selectTemplate(t.id, div); };
+                        div.innerHTML = `
+                            <div class="d-flex align-items-center w-100">
+                                <div class="bg-light rounded-circle p-2 me-3 text-success"><i class="fas fa-file-code"></i></div>
+                                <div>
+                                    <div class="fw-bold item-name">${t.title}</div>
+                                    <div class="text-muted x-small">Kullanıma hazır</div>
+                                </div>
+                                <div class="ms-auto check-indicator ${isActive ? '' : 'd-none'}">
+                                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                                </div>
+                            </div>`;
+                        container.appendChild(div);
+                    });
+                    const totalPages = Math.ceil(res.totalCount / res.pageSize);
+                    renderPagination('templatePagination', page, totalPages, 'loadTemplates');
+                });
+        }
+
+        // 📡 AJAX: Klasör Yükleme
+        var groupCurrentPage = 1;
+        var groupSearchTerm = '';
+        function loadGroups(page) {
+            groupCurrentPage = page;
+            var container = document.getElementById('dbGroupList');
+            container.innerHTML = '<div class="text-center text-muted py-4 small"><i class="fas fa-spinner fa-spin me-2"></i> Yükleniyor...</div>';
+
+            fetch('/Home/SearchGroupsDashboardAjax?term=' + encodeURIComponent(groupSearchTerm) + '&page=' + page)
+                .then(r => r.json())
+                .then(resp => {
+                    container.innerHTML = '';
+                    if (resp.data.length === 0) {
+                        container.innerHTML = '<div class="text-center text-muted py-4 small"><i class="fas fa-inbox me-2"></i> Klasör bulunamadı.</div>';
+                        document.getElementById('groupPagination').innerHTML = '';
+                        return;
+                    }
+                    resp.data.forEach(g => {
+                        var isActive = selectedGroupIds.indexOf(g.id) > -1;
+                        var div = document.createElement('div');
+                        div.className = 'list-item group-item' + (isActive ? ' active-group' : '');
+                        div.onclick = function() { toggleGroupSelection(g.id, g.groupName, div); };
+                        div.innerHTML = `
+                            <div class="d-flex align-items-center w-100">
+                                <div class="bg-light rounded-circle p-2 me-3 text-indigo"><i class="fas fa-folder"></i></div>
+                                <div>
+                                    <div class="fw-bold item-name">${g.groupName}</div>
+                                    <div class="text-muted x-small">Tıklayarak seç/kaldır</div>
+                                </div>
+                                <div class="ms-auto check-indicator ${isActive ? '' : 'd-none'}">
+                                    <i class="fas fa-check-circle text-primary fa-lg"></i>
+                                </div>
+                            </div>`;
+                        container.appendChild(div);
+                    });
+                    const totalPages = Math.ceil(resp.totalCount / resp.pageSize);
+                    renderPagination('groupPagination', page, totalPages, 'loadGroups');
+                });
+        }
+
+        // 🔥 Şablon Seçimi
+        function selectTemplate(id, element) {
+            document.querySelectorAll('#templateList .list-item').forEach(el => {
+                el.classList.remove('active-template');
+                el.querySelector('.check-indicator').classList.add('d-none');
+            });
+            element.classList.add('active-template');
+            element.querySelector('.check-indicator').classList.remove('d-none');
+            document.getElementById('finalTemplateId').value = id;
+        }
+
+        // 🔥 Klasör Toggle Seçimi
+        let selectedGroupIds = [];
+        function toggleGroupSelection(groupId, groupName, element) {
+            var idx = selectedGroupIds.indexOf(groupId);
+            if (idx > -1) {
+                selectedGroupIds.splice(idx, 1);
+                element.classList.remove('active-group');
+                element.querySelector('.check-indicator').classList.add('d-none');
+            } else {
+                selectedGroupIds.push(groupId);
+                element.classList.add('active-group');
+                element.querySelector('.check-indicator').classList.remove('d-none');
+            }
+
+            subscriberGroupFilter = selectedGroupIds.slice(); 
+            loadSubscribers(1); 
+
+            if (selectedGroupIds.length > 0) {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: `${selectedGroupIds.length} klasör seçili`, showConfirmButton: false, timer: 1000 });
+            }
+        }
+
+        function updateSelectionText() {
+            const count = selectedSubscriberIds.length;
+            if (count > 0) {
+                document.getElementById('selectionStatusText').innerHTML = `<span class="fw-bold text-primary">${count}</span> kişi seçildi.`;
+            } else {
+                document.getElementById('selectionStatusText').innerText = subscriberTotalCount > 0 ? subscriberTotalCount + ' abone bulundu.' : 'Aramak için yazın veya klasör seçin.';
+            }
+        }
+
+        function confirmMailSend() {
+            const count = selectedSubscriberIds.length;
+            if(!document.getElementById('finalTemplateId').value || count === 0) {
+                Swal.fire('Eksik Bilgi', 'Lütfen şablon ve en az bir alıcı seçin.', 'warning'); return;
+            }
+            document.getElementById('sendToAllInput').value = 'false';
+            Swal.fire({
+                title: 'Emin misiniz?', text: `${count} kişiye e-posta gönderilecek.`, icon: 'question',
+                showCancelButton: true, confirmButtonText: 'Evet, Gönder', confirmButtonColor: '#6366f1'
+            }).then(r => { 
+                if(r.isConfirmed) {
+                    // 🔥 SEÇİLEN ID'LERİ FORMA EKLE
+                    const form = document.getElementById('mailForm');
+                    
+                    // Varsa eski hidden inputları temizle (tekrar basılmasın)
+                    const oldInputs = form.querySelectorAll('input[name="subscriberIds"]');
+                    oldInputs.forEach(i => i.remove());
+
+                    // Yeni hidden inputlar ekle
+                    selectedSubscriberIds.forEach(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'subscriberIds';
+                        input.value = id;
+                        form.appendChild(input);
+                    });
+
+                    form.submit();
+                } 
+            });
+        }
+
+        function sendToAllMail() {
+            if(!document.getElementById('finalTemplateId').value) {
+                Swal.fire('Eksik Bilgi', 'Lütfen önce bir şablon seçin.', 'warning'); return;
+            }
+            const total = @ViewBag.TotalSubscribers;
+            Swal.fire({
+                title: 'Tüm Abonelere Gönder',
+                html: `<b>${total}</b> aktif abonenin tamamına e-posta gönderilecek.<br><small class="text-muted">Bu işlem geri alınamaz.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, Hepsine Gönder',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#6366f1'
+            }).then(r => {
+                if(r.isConfirmed) {
+                    document.getElementById('sendToAllInput').value = 'true';
+                    document.getElementById('mailForm').submit();
+                }
+            });
+        }
+    </script>
+}
+}

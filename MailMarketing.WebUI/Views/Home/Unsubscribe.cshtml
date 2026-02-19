@@ -1,0 +1,31 @@
+@{
+    Layout = null; // Menüleri göstermiyoruz, sadece sade bir mesaj.
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abonelikten Ayrıldınız</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { background-color: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .ios-card { background: #fff; border-radius: 30px; padding: 40px 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .icon-circle { width: 80px; height: 80px; background-color: #f2f2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: #8e8e93; font-size: 2rem; }
+        h1 { font-size: 1.5rem; font-weight: 700; color: #1c1c1e; margin: 0 0 10px; }
+        p { color: #8e8e93; line-height: 1.5; font-size: 1rem; margin-bottom: 30px; }
+        .btn-return { background-color: #007aff; color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 14px; font-weight: 600; display: inline-block; transition: transform 0.2s; }
+        .btn-return:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="ios-card">
+        <div class="icon-circle">
+            <i class="fas fa-envelope-open"></i>
+        </div>
+        <h1>Abonelikten Ayrıldınız</h1>
+        <p><strong>@ViewBag.Email</strong> adresi başarıyla listemizden çıkarıldı. Artık bizden güncelleme almayacaksınız.</p>
+        <a href="/" class="btn-return">Ana Sayfaya Dön</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+@model MailMarketing.Entity.Template
+@{
+    ViewData["Title"] = "Şablonu Düzenle";
+}
+
+<style>
+    /* iOS Sistem Arka Planı */
+    body { background-color: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    /* Sayfa Başlığı (Large Title) */
+    .ios-page-header { padding: 35px 0 20px 0; }
+    .ios-main-title { font-size: 2rem; font-weight: 800; color: #000; letter-spacing: -0.5px; }
+    .ios-id-badge { background: #e5e5ea; color: #8e8e93; font-size: 0.8rem; padding: 4px 10px; border-radius: 8px; vertical-align: middle; }
+
+    /* iOS Ana Kart */
+    .ios-form-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    /* Form Grupları (iOS Row Style) */
+    .ios-input-group { padding: 20px 25px; border-bottom: 1px solid #f2f2f7; }
+    .ios-input-group:last-child { border-bottom: none; }
+    
+    .ios-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .ios-input-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #1c1c1e;
+        border: none;
+        padding: 0;
+        width: 100%;
+        background: transparent;
+    }
+    .ios-input-text:focus { outline: none; box-shadow: none; }
+    .ios-input-text::placeholder { color: #c7c7cc; }
+
+    /* Editör Alanı Kişiselleştirme */
+    .editor-container { padding: 15px 20px; background: #fff; }
+    /* Summernote toolbar'ı iOS havasına sokalım */
+    .note-editor.note-frame { border: none !important; }
+    .note-toolbar { 
+        background-color: #f8f8f8 !important; 
+        border-bottom: 1px solid #f2f2f7 !important; 
+        border-radius: 12px 12px 0 0 !important; 
+    }
+    .note-btn { background: #fff !important; border: 1px solid #e5e5ea !important; border-radius: 8px !important; box-shadow: none !important; }
+
+    /* Alt Butonlar (Sticky Footer Style) */
+    .ios-action-bar {
+        padding: 20px;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+    .btn-ios {
+        border-radius: 14px;
+        font-weight: 600;
+        padding: 12px 28px;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-ios-save { background-color: #007aff; color: #fff; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2); }
+    .btn-ios-save:hover { background-color: #0062cc; transform: scale(1.02); color: #fff; }
+    
+    .btn-ios-cancel { background-color: #e5e5ea; color: #1c1c1e; }
+    .btn-ios-cancel:hover { background-color: #d1d1d6; }
+
+    /* Bilgi Notu */
+    .ios-info-text { font-size: 0.85rem; color: #8e8e93; text-align: center; padding: 15px; }
+</style>
+
+<div class="container pb-5">
+    @* 📱 iOS Sayfa Başlığı *@
+    <div class="ios-page-header">
+        <h1 class="ios-main-title">
+            Şablonu Düzenle 
+            <span class="ios-id-badge">ID: #@Model.Id</span>
+        </h1>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="ios-form-card">
+            @* 🏷️ Başlık Girişi *@
+            <div class="ios-input-group">
+                <label class="ios-label" asp-for="Title"><i class="fas fa-heading me-1"></i> Şablon Başlığı</label>
+                <input asp-for="Title" class="ios-input-text" placeholder="Örn: Haftalık Bülten..." required />
+            </div>
+
+            @* ✍️ Editör Alanı *@
+            <div class="ios-input-group">
+                <label class="ios-label"><i class="fas fa-code me-1"></i> E-Posta İçeriği</label>
+                <div class="editor-container border rounded-4 mt-2">
+                    <textarea asp-for="Content" id="summernote"></textarea>
+                </div>
+            </div>
+
+            @* ⚙️ Alt Bilgi ve Aksiyonlar *@
+            <div class="ios-action-bar border-top">
+                <a href="/Template/Index" class="btn-ios btn-ios-cancel text-decoration-none">Vazgeç</a>
+                <button type="submit" class="btn-ios btn-ios-save">
+                    <i class="fas fa-check-circle me-1"></i> Değişiklikleri Kaydet
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="ios-info-text">
+        <i class="fas fa-info-circle me-1"></i> Mevcut HTML tasarımını bozmadan içeriği güncelleyebilirsiniz.
+    </div>
+</div>
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#summernote').summernote({
+                placeholder: 'E-posta içeriğini buraya yazın...',
+                tabsize: 2,
+                height: 400,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
+            });
+        });
+    </script>
+}

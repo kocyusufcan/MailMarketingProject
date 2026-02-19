@@ -1,0 +1,421 @@
+@model MailMarketing.Entity.User
+@{
+    ViewData["Title"] = "Kontrol Merkezi";
+}
+
+<style>
+    /* --- MODERN SAAS UI DEĞİŞKENLERİ --- */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --surface-color: #ffffff;
+        --bg-color: #f8fafc;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+    }
+
+    body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: var(--text-main); }
+
+    /* Üst Banner */
+    .welcome-banner {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+    }
+    .welcome-banner::after {
+        content: ""; position: absolute; right: -50px; top: -50px;
+        width: 200px; height: 200px; background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+
+    /* Grid Yapısı */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+
+    /* Kart Tasarımı */
+    .web-card {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 30px;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    .web-card:hover { border-color: #6366f1; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+
+    /* Input Tasarımı */
+    .form-group-custom { margin-bottom: 20px; }
+    .label-custom { font-weight: 700; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-custom {
+        width: 100%; border: 1.5px solid var(--border-color); border-radius: 12px;
+        padding: 12px 15px; font-size: 0.95rem; transition: all 0.2s; background: #fcfcfd; color: #334155;
+    }
+    .input-custom:focus { border-color: #6366f1; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+
+    /* Davet Kodu Kutusu */
+    .invite-box {
+        background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 12px;
+        padding: 12px 15px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-text { font-family: 'Monaco', monospace; font-weight: 700; color: #475569; font-size: 1.1rem; letter-spacing: 1px; }
+
+    /* Alt Aksiyon Alanı */
+    .action-area {
+        margin-top: 30px;
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
+    }
+
+    .btn-save-all {
+        background: var(--primary-gradient); color: white; border: none;
+        border-radius: 16px; padding: 18px 60px; font-weight: 700; font-size: 1.1rem;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 10px; min-width: 300px; justify-content: center;
+    }
+    .btn-save-all:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+    /* Tehlikeli Bölge Kartı */
+    .danger-card {
+        margin-top: 30px;
+        background: #fff;
+        border: 1px solid #fee2e2;
+        border-radius: 20px;
+        padding: 30px;
+        transition: all 0.3s;
+    }
+    .danger-card:hover { border-color: #ef4444; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.05); }
+
+    /* Responsive */
+    @@media (max-width: 992px) { .settings-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="container py-4">
+    @* 🚀 Üst Banner *@
+    <div class="welcome-banner">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">Kontrol Merkezi</h1>
+                <p class="mb-0 opacity-75">Hesap verilerinizi ve pazarlama ayarlarınızı buradan özelleştirin.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold shadow-sm">
+                    <i class="fas fa-check-circle me-1"></i> Sistem Aktif
+                </span>
+            </div>
+        </div>
+    </div>
+
+    @* 🔥 FORM BAŞLANGICI *@
+    <form asp-action="UpdateProfile" method="post" autocomplete="off">
+        
+        <div class="settings-grid">
+            @* SOL: Kişisel Bilgiler *@
+            <div class="web-card">
+                <h4 class="fw-bold mb-4 text-dark"><i class="fas fa-user-circle me-2 text-indigo"></i> Kişisel Profil</h4>
+                
+                <div class="form-group-custom">
+                    <label class="label-custom">Kullanıcı Davet Kodunuz</label>
+                    <div class="invite-box">
+                        <span class="code-text" id="inviteCode">@Model.AdminInvitationCode</span>
+                        <button type="button" class="btn btn-sm btn-white border shadow-sm rounded-pill px-3 fw-bold" onclick="copyCode()">
+                            <i class="fas fa-copy"></i> Kopyala
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label class="label-custom">Adınız</label>
+                            <input type="text" name="FirstName" value="@Model.FirstName" class="input-custom" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label class="label-custom">Soyadınız</label>
+                            <input type="text" name="LastName" value="@Model.LastName" class="input-custom" required autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-custom">
+                    <label class="label-custom">Görünüm Adı (Mağaza / Bülten)</label>
+                    <input type="text" name="DisplayName" value="@Model.DisplayName" class="input-custom" placeholder="Örn: Tech Mağazası" required autocomplete="off">
+                </div>
+                <div class="form-group-custom">
+                    <label class="label-custom">E-Posta Adresi</label>
+                    <input type="email" name="Email" value="@Model.Email" class="input-custom" required autocomplete="off">
+                </div>
+            </div>
+
+            @* SAĞ: Güvenlik ve Şifre *@
+            <div class="web-card">
+                <h4 class="fw-bold mb-4 text-dark"><i class="fas fa-shield-alt me-2 text-indigo"></i> Güvenlik & Erişim</h4>
+                
+                <div class="alert alert-info border-0 rounded-3 p-3 small mb-4 bg-opacity-10" style="background-color: #eef2ff; color: #4338ca;">
+                    <i class="fas fa-key me-2"></i> Şifrenizi değiştirmek istemiyorsanız bu alanları boş bırakın.
+                </div>
+
+                <div class="form-group-custom">
+                    <label class="label-custom">Mevcut Şifre</label>
+                    <input type="password" name="CurrentPassword" class="input-custom" placeholder="••••••••" autocomplete="new-password">
+                </div>
+
+                <div class="form-group-custom">
+                    <label class="label-custom">Yeni Şifre</label>
+                    <input type="password" name="NewPassword" class="input-custom" placeholder="Minimum 8 karakter" autocomplete="new-password">
+                </div>
+
+                <hr class="my-4 opacity-10">
+
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <label class="label-custom mb-0">Sistem Rolü</label>
+                        <div class="fw-bold mt-1 text-primary">@(Model.IsAdmin ? "Yönetici / Firma" : "Kullanıcı")</div>
+                    </div>
+                    <a href="/Setting" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">Tanım Ayarları</a>
+                </div>
+            </div>
+        </div>
+
+        @* 🚀 ALT AKSİYON ALANI *@
+        <div class="action-area">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                
+                <div class="mb-4 d-flex align-items-center gap-3 p-3 rounded-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                    <i class="fas fa-eye text-muted"></i>
+                    <div>
+                        <div class="fw-bold text-start" style="font-size: 0.9rem;">Bülten Görünürlüğü</div>
+                        <div class="text-muted x-small">Diğer kullanıcılar profilinizi görebilsin mi?</div>
+                    </div>
+                    <div class="form-check form-switch ms-3">
+                        <input class="form-check-input" type="checkbox" name="ShowInBulletin" id="bulletinSwitch" style="width: 50px; height: 26px; cursor: pointer;" @(Model.IsPublic ? "checked" : "")>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save-all">
+                    <i class="fas fa-save fa-lg"></i> Değişiklikleri Kaydet
+                </button>
+            </div>
+        </div>
+    </form>
+
+    @* 🛑 TEHLİKELİ BÖLGE: HESAP SİLME *@
+    <div class="danger-card">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="fw-bold text-danger mb-1"><i class="fas fa-skull-crossbones me-2"></i> Hesabı Kalıcı Olarak Sil</h5>
+                <p class="text-muted small mb-md-0">
+                    Hesabınızı sildiğinizde tüm aboneleriniz, gönderdiğiniz mailler ve ayarlarınız <strong>geri döndürülemez şekilde</strong> silinecektir.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button type="button" onclick="confirmSelfDelete()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">
+                    <i class="fas fa-user-slash me-2"></i>Hesabımı Sil
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --- 🔐 E-POSTA DOĞRULAMA MODALI (GÜNCEL) --- *@
+@if (ViewBag.Step == 2)
+{
+    <div class="modal fade show" id="verifyModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 bg-light rounded-top-4 py-3">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-envelope-open-text me-2 text-primary"></i> Doğrulama Kodu</h5>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <p class="text-muted mb-4">
+                        Güvenliğiniz için <strong>@ViewBag.NewEmail</strong> adresine bir doğrulama kodu gönderdik.
+                    </p>
+
+                    <form asp-action="VerifyEmailChange" method="post">
+                        <input type="hidden" name="correctCode" value="@ViewBag.CorrectCode" />
+                        <input type="hidden" name="newEmail" value="@ViewBag.NewEmail" />
+                        <input type="hidden" name="fName" value="@ViewBag.NewFName" />
+                        <input type="hidden" name="lName" value="@ViewBag.NewLName" />
+                        <input type="hidden" name="dName" value="@ViewBag.NewDName" />
+                        <input type="hidden" name="isPublicValue" value="@(ViewBag.IsPublicValue?.ToString().ToLower() ?? "false")" />
+                        
+                        <div class="form-group mb-2">
+                            @* 🔥 ID EKLENDİ: id="verifyCodeInput" - Kilitlenmek için *@
+                            <input type="text" id="verifyCodeInput" name="code" class="form-control form-control-lg text-center fw-bold fs-3" 
+                                   placeholder="000000" maxlength="6" required style="letter-spacing: 8px; border-radius: 12px; border: 2px solid #e2e8f0;">
+                        </div>
+
+                        <div class="mb-4">
+                            <p id="timerText" class="text-muted small mt-2">
+                                Kodun süresi doluyor: <span id="countdown" class="fw-bold text-danger" style="font-variant-numeric: tabular-nums;">01:00</span>
+                            </p>
+                            
+                            <div id="resendArea" style="display: none;">
+                                <p class="small text-muted mb-1">Kod gelmedi mi?</p>
+                                <button type="button" onclick="resendProfileCode()" class="btn btn-link btn-sm text-primary text-decoration-none fw-bold p-0">
+                                    <i class="fas fa-redo me-1"></i> Yeni Kod Gönder
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            @* 🔥 ID EKLENDİ: id="verifyBtn" - Kilitlenmek için *@
+                            <button type="submit" id="verifyBtn" class="btn btn-primary btn-lg rounded-pill fw-bold">Doğrula ve Kaydet</button>
+                            <a href="/User/Profile" class="btn btn-light rounded-pill text-muted">İptal Et</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function copyCode() {
+            const code = document.getElementById('inviteCode').innerText;
+            navigator.clipboard.writeText(code);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Kopyalandı', showConfirmButton: false, timer: 1500 });
+        }
+
+        function confirmSelfDelete() {
+            Swal.fire({
+                title: 'Emin misiniz?', text: "Hesabınız silinecek!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Evet, Sil'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form'); form.method = 'POST'; form.action = '/User/DeleteMyAccount'; document.body.appendChild(form); form.submit();
+                }
+            })
+        }
+
+        // 🔥 GELİŞMİŞ TIMER VE INPUT KONTROLÜ
+        var timerInterval;
+        
+        // Backend'den gelen kalan süreyi alıyoruz. Yoksa 60 saniye varsayıyoruz.
+        // Eğer süre negatif geldiyse backend zaten 0 gönderiyor.
+        var serverRemainingTime = @(ViewBag.RemainingTime ?? 60);
+        var timeLeft = serverRemainingTime;
+
+        function startProfileTimer() {
+            clearInterval(timerInterval);
+            
+            var timerText = document.getElementById("timerText");
+            var resendArea = document.getElementById("resendArea");
+            var countdown = document.getElementById("countdown");
+            var inputField = document.getElementById("verifyCodeInput"); // Input alanı
+            var verifyBtn = document.getElementById("verifyBtn"); // Buton
+
+            // --- DURUM KONTROLÜ ---
+            if (timeLeft > 0) {
+                // Süre varsa inputları AÇ
+                if(inputField) inputField.disabled = false;
+                if(verifyBtn) verifyBtn.disabled = false;
+                
+                if(timerText) timerText.style.display = "block";
+                if(resendArea) resendArea.style.display = "none";
+            } else {
+                // Süre en baştan bittiyse (Sayfa yenilendiğinde 0 geldiyse)
+                expireSession();
+                return;
+            }
+
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                
+                // Gösterim Formatı (00:34 gibi)
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                if(countdown) {
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+                    countdown.innerText = minutes + ":" + seconds;
+                }
+
+                // SÜRE BİTTİĞİNDE YAPILACAKLAR
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    expireSession();
+                }
+            }, 1000);
+        }
+
+        // Süre dolunca çalışan fonksiyon (KİLİTLEME)
+        function expireSession() {
+            var timerText = document.getElementById("timerText");
+            var resendArea = document.getElementById("resendArea");
+            var inputField = document.getElementById("verifyCodeInput");
+            var verifyBtn = document.getElementById("verifyBtn");
+
+            if(timerText) timerText.style.display = "none";
+            if(resendArea) resendArea.style.display = "block";
+            
+            // 🔥 INPUT'U KİLİTLE VE UYARI VER
+            if(inputField) {
+                inputField.value = ""; // İsteğe bağlı: İçini temizle
+                inputField.disabled = true; // Girişi engelle
+                inputField.placeholder = "Süre doldu!";
+            }
+            if(verifyBtn) verifyBtn.disabled = true; // Butonu da kapat
+        }
+
+        // Sayfa Yüklendiğinde
+        $(document).ready(function() {
+            if ($('#verifyModal').length > 0) {
+                // Hata mesajı varsa göster
+                var errorMsg = '@Html.Raw(TempData["Error"])';
+                if (errorMsg) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Uyarı',
+                        text: errorMsg,
+                        confirmButtonColor: '#d33',
+                        timer: 3000
+                    });
+                }
+                // Sayacı backend'den gelen gerçek süreyle başlat
+                startProfileTimer();
+            }
+        });
+
+        // Yeni Kod İsteği
+        function resendProfileCode() {
+            $.post("/User/ResendVerifyCode", function(response) {
+                if(response.success) {
+                    Swal.fire({
+                        icon: 'success', title: 'Kod Gönderildi',
+                        text: 'Lütfen mail kutunuzu kontrol edin.', timer: 2000, showConfirmButton: false
+                    });
+                    
+                    // Yeni kod gelince her şeyi SIFIRLA ve AÇ
+                    timeLeft = 60; 
+                    
+                    var inputField = document.getElementById("verifyCodeInput");
+                    var verifyBtn = document.getElementById("verifyBtn");
+                    
+                    if(inputField) {
+                        inputField.disabled = false; // Kilidi aç
+                        inputField.value = "";
+                        inputField.placeholder = "000000";
+                        inputField.focus();
+                    }
+                    if(verifyBtn) verifyBtn.disabled = false;
+
+                    startProfileTimer(); // Sayacı başlat
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Hata', text: response.message });
+                }
+            });
+        }
+    </script>
+}

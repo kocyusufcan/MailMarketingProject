@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Excel'den Toplu Yükleme";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-file-earmark-spreadsheet"></i> Excel ile Toplu Abone Yükle</h4>
+        </div>
+        <div class="card-body">
+            
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <div class="alert alert-info">
+                <strong><i class="bi bi-info-circle"></i> Dikkat:</strong> Yükleyeceğiniz Excel dosyasının formatı şöyle olmalıdır:
+                <ul>
+                    <li><strong>1. Sütun (A):</strong> E-Posta Adresi</li>
+                    <li><strong>2. Sütun (B):</strong> Ad</li>
+                    <li><strong>3. Sütun (C):</strong> Soyad</li>
+                    <li><em>1. Satır başlık olarak kabul edilir ve okunmaz. Veriler 2. satırdan başlamalıdır.</em></li>
+                </ul>
+            </div>
+
+            <form asp-action="Import" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Excel Dosyası Seç (.xlsx)</label>
+                    <input type="file" name="file" class="form-control" accept=".xlsx" required />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload"></i> Yüklemeyi Başlat
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
