@@ -26,7 +26,7 @@ public class HomeController : Controller
     }
 
     private readonly MailMarketingContext _context = new MailMarketingContext();
-    // 🔥 MailService burada tanımlı, aşağıda bunu kullanacağız
+    // MailService tanımı
     private readonly MailService _mailService = new MailService(); 
 
     private static readonly object _bounceLock = new object();
@@ -41,10 +41,59 @@ public class HomeController : Controller
             return RedirectToAction("Dashboard"); 
         }
 
+        // 1. Landing Sayfası
+        // Veriler AJAX ile çekileceği için başlangıçta boş model gönderilir.
         using (var db = new MailMarketingContext())
         {
-            var publicUsers = db.Users.Where(u => u.IsPublic).ToList(); 
-            return View("Landing", publicUsers); 
+            // Başlangıçta boş liste gönderilir, içerik AJAX ile yüklenir.
+            return View("Landing", new List<MailMarketing.Entity.User>()); 
+        }
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult SearchPublicUsers(string term = "", int page = 1)
+    {
+        int pageSize = 10;
+        try 
+        {
+            using (var db = new MailMarketingContext())
+            {
+                var query = db.Users.Where(u => u.IsPublic).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(term))
+                {
+                    term = term.ToLower();
+                    query = query.Where(u => 
+                        (u.DisplayName != null && u.DisplayName.ToLower().Contains(term)) ||
+                        (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
+                        (u.LastName != null && u.LastName.ToLower().Contains(term))
+                    );
+                }
+
+                var totalCount = query.Count();
+                
+                // BrandName [NotMapped] olduğundan SQL sorgusu için DisplayName kullanılır; sonuçlar belleğe alındıktan sonra BrandName computed property'si çalışır.
+                var rawUsers = query.OrderBy(u => u.DisplayName ?? u.FirstName) 
+                                 .Skip((page - 1) * pageSize)
+                                 .Take(pageSize)
+                                 .Select(u => new { u.Id, u.DisplayName, u.FirstName, u.LastName })
+                                 .ToList();
+
+                var users = rawUsers.Select(u => new 
+                                 {
+                                     id = u.Id,
+                                     name = !string.IsNullOrEmpty(u.DisplayName) ? u.DisplayName : $"{u.FirstName} {u.LastName}".Trim()
+                                 })
+                                 .ToList();
+
+                return Json(new { totalCount, page, pageSize, items = users });
+            }
+        }
+        catch 
+        {
+            // Hata durumunda (DB erişim sorunu vs.) boş liste dönerek arayüzün bozulmasını engelliyoruz
+            return Json(new { totalCount = 0, page, pageSize, items = new List<object>() });
         }
     }
 
@@ -71,16 +120,57 @@ public class HomeController : Controller
         try
         {
             string toEmail = _configuration["ContactInfo:Email"] ?? "info@mailmarketing.com";
-            string body = $@"
-                <div style='font-family:sans-serif; padding:20px; border:1px solid #eee; border-radius:5px;'>
-                    <h3>Yeni İletişim Mesajı</h3>
-                    <p><strong>Gönderen:</strong> {name} {surname}</p>
-                    <p><strong>E-Posta:</strong> {email}</p>
-                    <p><strong>Konu:</strong> {subject}</p>
-                    <hr>
-                    <p><strong>Mesaj:</strong></p>
-                    <p>{message}</p>
-                </div>";
+                string body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {{ background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }}
+                        .container {{ padding: 40px 20px; }}
+                        .card {{ background-color: #ffffff; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; }}
+                        .header {{ background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 30px; color: #ffffff; }}
+                        .header h2 {{ margin: 0; font-size: 24px; font-weight: 600; text-align: center; }}
+                        .content {{ padding: 30px; }}
+                        .field-group {{ margin-bottom: 20px; }}
+                        .label {{ color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }}
+                        .value {{ color: #1e293b; font-size: 16px; font-weight: 500; }}
+                        .message-box {{ background-color: #f1f5f9; padding: 20px; border-radius: 8px; color: #334155; line-height: 1.6; margin-top: 10px; border-left: 4px solid #3b82f6; }}
+                        .footer {{ background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 13px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='card'>
+                            <div class='header'>
+                                <h2>📬 Yeni İletişim Mesajı</h2>
+                            </div>
+                            <div class='content'>
+                                <div class='field-group'>
+                                    <div class='label'>GÖNDEREN</div>
+                                    <div class='value'>{name} {surname}</div>
+                                </div>
+                                <div class='field-group'>
+                                    <div class='label'>E-POSTA</div>
+                                    <div class='value'><a href='mailto:{email}' style='color:#3b82f6;text-decoration:none;'>{email}</a></div>
+                                </div>
+                                <div class='field-group'>
+                                    <div class='label'>KONU</div>
+                                    <div class='value'>{subject}</div>
+                                </div>
+                                <div class='field-group'>
+                                    <div class='label'>MESAJ İÇERİĞİ</div>
+                                    <div class='message-box'>
+                                        {message.Replace("\n", "<br>")}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='footer'>
+                                © {DateTime.Now.Year} MailMarketing İletişim Formu
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>";
 
             _mailService.SendSystemEmail(toEmail, $"İletişim Formu: {subject}", body);
             TempData["Message"] = "Mesajınız başarıyla gönderildi. En kısa sürede dönüş yapacağız.";
@@ -115,11 +205,11 @@ public class HomeController : Controller
             }
             else { ViewBag.SuccessRate = 0; }
 
-            ViewBag.Groups = null; // Klasörler AJAX ile yüklenecek
-            ViewBag.Templates = null; // Şablonlar AJAX ile yüklenecek
+            ViewBag.Groups = null; // Klasörler AJAX ile yüklenir
+            ViewBag.Templates = null; // Şablonlar AJAX ile yüklenir
             ViewBag.TotalTemplates = db.Templates.Count(t => t.UserId == currentUserId && t.IsActive);
             ViewBag.TotalGroups = db.SubscriberGroups.Count(g => g.UserId == currentUserId);
-            // Aboneler artık AJAX ile yükleniyor, sayfa açılışında çekilmiyor
+            // Aboneler AJAX ile yüklenir, sayfa açılışında veri çekilmez
 
             // Grafik Verileri
             var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Today.AddDays(-i)).OrderBy(d => d).ToList();
@@ -258,7 +348,7 @@ public class HomeController : Controller
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentUserId = int.Parse(sid!);
 
-        // 2. "Tüm Abonelere Gönder" modu: sunucu tarafında tüm aktif aboneleri çek
+        // 2. "Tüm Abonelere Gönder" seçeneği: Sunucu tarafında aktif aboneler çekilir.
         if (sendToAll)
         {
             using (var db = new MailMarketingContext())
@@ -287,13 +377,13 @@ public class HomeController : Controller
             }
         }
 
-        // 🔥 4. UZMANA DEVRETME: MailService kullanıyoruz!
-        // Böylece Footer, Unsubscribe Linki ve Dinamik İsim otomatik ekleniyor.
+        // 4. Mail gönderimi için MailService kullanılır.
+        // Footer, abonelikten ayrılma linki ve dinamik içerik otomatik eklenir.
         string result = _mailService.SendBulkMail(templateId.Value, subscriberIds, currentUserId);
 
         if (result == "OK")
         {
-            TempData["Message"] = "Toplu gönderim başarıyla başlatıldı! 🚀";
+            TempData["Message"] = "Toplu gönderim başarıyla başlatıldı.";
         }
         else
         {
@@ -442,7 +532,7 @@ public class HomeController : Controller
         {
             if (db.Subscribers.Any(s => s.Email == email && s.UserId == targetUserId))
             {
-                TempData["Error"] = "Bu e-posta adresiyle bu bültene zaten abonesiniz! ⚠️";
+                TempData["Error"] = "Bu e-posta adresiyle bu bültene zaten abonesiniz.";
                 return RedirectToAction("Index");
             }
             
@@ -489,7 +579,7 @@ public class HomeController : Controller
                     }
                 }
             }
-            TempData["Message"] = "Aboneliğiniz başarıyla onaylandı! 🎉";
+            TempData["Message"] = "Aboneliğiniz başarıyla onaylandı.";
             return RedirectToAction("Index");
         }
         

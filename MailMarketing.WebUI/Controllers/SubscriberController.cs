@@ -19,7 +19,7 @@ public class SubscriberController : Controller
 {
     private readonly SubscriberManager _subscriberManager = new SubscriberManager();
 
-    // 📊 ABONE LİSTESİ (GENEL)
+    // Abone Listesi (Genel)
     public IActionResult Index(string? searchString, DateTime? startDate, DateTime? endDate, int? groupId, string? status, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -92,7 +92,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // 🔥 KLASÖR MERKEZİ (BÜYÜK İKONLU GÖRÜNÜM)
+    // Klasör Merkezi
     public IActionResult Groups(string? searchString, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -113,10 +113,18 @@ public class SubscriberController : Controller
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
             page = page < 1 ? 1 : page;
 
-            var list = query.OrderBy(g => g.GroupName)
+            // "Tüm Aboneler" sistem klasörü her zaman en başta gösterilir (sayfalamadan bağımsız)
+            var systemGroup = db.SubscriberGroups
+                .FirstOrDefault(g => g.UserId == currentUserId && g.IsSystem);
+
+            var list = query.Where(g => !g.IsSystem)
+                            .OrderBy(g => g.GroupName)
                             .Skip((page - 1) * pageSize)
                             .Take(pageSize)
                             .ToList();
+
+            if (systemGroup != null)
+                list.Insert(0, systemGroup);
 
             var groupCounts = db.SubscriberGroupMembers
                                 .Where(m => list.Select(l => l.Id).Contains(m.GroupId))
@@ -133,7 +141,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // 🔥 YENİ: KLASÖRÜN İÇİNDEKİLERİ GÖSTEREN DETAY SAYFASI
+    // Klasörün içindekilerini gösteren detay sayfası
     public IActionResult GroupDetails(int groupId, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -169,7 +177,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // 🔥 YENİ: KLASÖRE ABONE EKLEME SAYFASI (Seçim Ekranı)
+    // Klasöre abone ekleme sayfası (Seçim Ekranı)
     public IActionResult AddMembers(int groupId, string? searchString, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -210,7 +218,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // 🔥 YENİ: SEÇİLENLERİ KAYDET
+    // Seçilenleri kaydet
     [HttpPost]
     public IActionResult SaveMembersToGroup(int groupId, int[] subscriberIds)
     {
@@ -231,7 +239,7 @@ public class SubscriberController : Controller
         return RedirectToAction("GroupDetails", new { groupId });
     }
 
-    // 🔥 AJAX İLE KLASÖR ARAMA (SAYFALI)
+    // AJAX ile klasör arama (Sayfalandırmalı)
     [HttpGet]
     public IActionResult SearchGroupsAjax(string term = "", int page = 1)
     {
@@ -259,7 +267,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // 🚀 AJAX İLE ABONE LİSTELEME (Parametreli)
+    // AJAX ile abone listeleme (Parametreli)
     [HttpGet]
     public IActionResult SearchSubscribersIndexAjax(string? searchString, DateTime? startDate, DateTime? endDate, int? groupId, string? status, int page = 1)
     {
@@ -321,7 +329,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // --- 📁 KLASÖR İŞLEMLERİ ---
+    // --- Klasör İşlemleri ---
 
     [HttpPost]
     public IActionResult CreateGroup(string groupName)
@@ -334,6 +342,13 @@ public class SubscriberController : Controller
 
         using (var db = new MailMarketingContext())
         {
+            // Sistem klasörünün ismiyle aynı adda klasör açılamaz
+            if (trimmedName.ToLower() == "tüm aboneler")
+            {
+                TempData["Error"] = "'Tüm Aboneler' adı sistem tarafından ayrılmıştır, bu isimde klasör oluşturamazsınız.";
+                return RedirectToAction("Groups");
+            }
+
             bool exists = db.SubscriberGroups.Any(g => g.UserId == currentUserId && g.GroupName.ToLower() == trimmedName.ToLower());
 
             if (exists)
@@ -347,7 +362,7 @@ public class SubscriberController : Controller
             db.SaveChanges();
             
             LogManager.LogAction(currentUserId, "Klasör Oluşturuldu", $"'{trimmedName}' isimli yeni bir klasör oluşturuldu.");
-            TempData["Message"] = "Klasör başarıyla oluşturuldu. ✅";
+            TempData["Message"] = "Klasör başarıyla oluşturuldu.";
         }
         return RedirectToAction("Groups");
     }
@@ -363,6 +378,13 @@ public class SubscriberController : Controller
             var group = db.SubscriberGroups.FirstOrDefault(g => g.Id == id && g.UserId == currentUserId);
             if (group != null)
             {
+                // Sistem klasörü silinemez
+                if (group.IsSystem)
+                {
+                    TempData["Error"] = "'Tüm Aboneler' sistem klasörü silinemez!";
+                    return RedirectToAction("Groups");
+                }
+
                 string oldName = group.GroupName;
                 var links = db.SubscriberGroupMembers.Where(m => m.GroupId == id);
                 db.SubscriberGroupMembers.RemoveRange(links);
@@ -385,7 +407,10 @@ public class SubscriberController : Controller
 
         using (var db = new MailMarketingContext())
         {
-            var groupsToDelete = db.SubscriberGroups.Where(g => groupIds.Contains(g.Id) && g.UserId == currentUserId).ToList();
+            // Sistem klasörlerini toplu silme listesinden çıkar
+            var groupsToDelete = db.SubscriberGroups
+                .Where(g => groupIds.Contains(g.Id) && g.UserId == currentUserId && !g.IsSystem)
+                .ToList();
             int count = groupsToDelete.Count;
             foreach (var group in groupsToDelete)
             {
@@ -414,6 +439,10 @@ public class SubscriberController : Controller
         {
             var group = db.SubscriberGroups.FirstOrDefault(g => g.Id == id && g.UserId == currentUserId);
             if (group == null) return Json(new { success = false, message = "Klasör bulunamadı veya yetkiniz yok." });
+
+            // Sistem klasörü yeniden adlandırılamaz
+            if (group.IsSystem)
+                return Json(new { success = false, message = "'Tüm Aboneler' sistem klasörü yeniden adlandırılamaz!" });
 
             // Aynı isimde başka klasör var mı kontrolü
             bool exists = db.SubscriberGroups.Any(g => g.UserId == currentUserId && g.Id != id && g.GroupName.ToLower() == trimmedName.ToLower());
@@ -452,7 +481,7 @@ public class SubscriberController : Controller
                     db.SaveChanges();
                     
                     LogManager.LogAction(currentUserId, "Klasöre Üye Eklendi", $"'{subscriber.Email}' adresi '{group.GroupName}' klasörüne eklendi.");
-                    TempData["Message"] = "Abone klasöre eklendi! 📂";
+                    TempData["Message"] = "Abone klasöre eklendi.";
                 }
                 else
                 {
@@ -524,6 +553,10 @@ public class SubscriberController : Controller
             var group = db.SubscriberGroups.FirstOrDefault(g => g.Id == groupId && g.UserId == currentUserId);
             if (group == null) return Json(new { success = false, message = "Yetkisiz işlem!" });
 
+            // Sistem klasöründen abone çıkarılamaz
+            if (group.IsSystem)
+                return Json(new { success = false, message = "'Tüm Aboneler' sistem klasöründen abone çıkarılamaz!" });
+
             var relations = db.SubscriberGroupMembers
                 .Where(m => m.GroupId == groupId && subscriberIds.Contains(m.SubscriberId))
                 .ToList();
@@ -590,7 +623,7 @@ public class SubscriberController : Controller
         }
     }
 
-    // --- 👤 TEMEL ABONE İŞLEMLERİ ---
+    // --- Temel Abone İşlemleri ---
 
     [HttpGet]
     public IActionResult Create() => View();
@@ -648,7 +681,7 @@ public class SubscriberController : Controller
                 
                 string durum = sub.IsActive ? "aktife" : "pasife";
                 LogManager.LogAction(currentUserId, "Abone Durumu Değişti", $"{sub.Email} adresi {durum} alındı.");
-                TempData["Message"] = "Abone durumu güncellendi. ✅";
+                TempData["Message"] = "Abone durumu güncellendi.";
             }
         }
         return RedirectToAction("Index");
@@ -680,13 +713,13 @@ public class SubscriberController : Controller
                 _subscriberManager.Delete(id);
                 
                 LogManager.LogAction(currentUserId, "Abone Silindi", $"{deletedEmail} e-posta adresi sistemden silindi.");
-                TempData["Message"] = "Abone başarıyla silindi. ✅";
+                TempData["Message"] = "Abone başarıyla silindi.";
             }
         }
         return RedirectToAction("Index");
     }
 
-    // --- 🚀 TOPLU İŞLEMLER ---
+    // --- Toplu İşlemler ---
 
     [HttpGet]
     public IActionResult Import() => View();
@@ -705,13 +738,37 @@ public class SubscriberController : Controller
                 var worksheet = package.Workbook.Worksheets.FirstOrDefault();
                 if (worksheet == null) return View();
                 using (var db = new MailMarketingContext()) {
+                    // Sistem klasörünü bir kez bul
+                    var systemGroup = db.SubscriberGroups
+                        .FirstOrDefault(g => g.UserId == currentUserId && g.IsSystem);
+
                     for (int row = 2; row <= worksheet.Dimension.Rows; row++) {
                         var email = worksheet.Cells[row, 1].Text?.Trim();
                         if (string.IsNullOrEmpty(email) || db.Subscribers.Any(s => s.Email == email && s.UserId == currentUserId)) continue;
-                        db.Subscribers.Add(new Subscriber { Email = email, FirstName = worksheet.Cells[row, 2].Text, LastName = worksheet.Cells[row, 3].Text, CreatedDate = DateTime.Now, IsActive = true, UserId = currentUserId });
+                        
+                        var newSub = new Subscriber { 
+                            Email = email, 
+                            FirstName = worksheet.Cells[row, 2].Text, 
+                            LastName = worksheet.Cells[row, 3].Text, 
+                            CreatedDate = DateTime.Now, 
+                            IsActive = true, 
+                            UserId = currentUserId 
+                        };
+                        db.Subscribers.Add(newSub);
+                        db.SaveChanges(); // Id alması için hemen kaydet
+
+                        // Sistem klasörüne de ekle
+                        if (systemGroup != null)
+                        {
+                            db.SubscriberGroupMembers.Add(new SubscriberGroupMember { 
+                                GroupId = systemGroup.Id, 
+                                SubscriberId = newSub.Id 
+                            });
+                            db.SaveChanges();
+                        }
+
                         addedCount++;
                     }
-                    await db.SaveChangesAsync();
                     
                     LogManager.LogAction(currentUserId, "Excel Aktarımı", $"Excel üzerinden {addedCount} yeni abone yüklendi.");
                     TempData["Message"] = "Excel aktarımı tamamlandı.";
@@ -748,7 +805,7 @@ public class SubscriberController : Controller
         }
 
         if (skipped > 0) TempData["Error"] = $"{deleted} kişi silindi, {skipped} kişi gönderim kaydı olduğu için atlandı!";
-        else TempData["Message"] = "Seçilen aboneler silindi. ✅";
+        else TempData["Message"] = "Seçilen aboneler silindi.";
 
         return RedirectToAction("Index");
     }
@@ -766,7 +823,7 @@ public class SubscriberController : Controller
             db.SaveChanges();
             
             LogManager.LogAction(currentUserId, "Toplu Abone Aktivasyonu", $"{subs.Count} adet abone aktife çekildi.");
-            TempData["Message"] = $"{subs.Count} abone başarıyla aktifleştirildi. ✅";
+            TempData["Message"] = $"{subs.Count} abone başarıyla aktifleştirildi.";
         }
         return RedirectToAction("Index");
     }
@@ -784,7 +841,7 @@ public class SubscriberController : Controller
             db.SaveChanges();
             
             LogManager.LogAction(currentUserId, "Toplu Abone Deaktivasyonu", $"{subs.Count} adet abone pasife çekildi.");
-            TempData["Message"] = $"{subs.Count} abone pasife alındı. ⚠️";
+            TempData["Message"] = $"{subs.Count} abone pasife alındı.";
         }
         return RedirectToAction("Index");
     }

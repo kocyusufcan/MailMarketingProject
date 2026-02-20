@@ -12,7 +12,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";
         options.Cookie.Name = "MailMarketingAuth"; 
         
-        // 🔥 GÜNCELLEME BURADA YAPILDI
+        // Cookie süresini güncelliyoruz
         options.ExpireTimeSpan = TimeSpan.FromDays(30); // Varsayılan ömür 30 gün olsun (Login'de override edilebilir)
         options.SlidingExpiration = true; // Kullanıcı sitede gezdikçe süre otomatik uzasın
         options.Cookie.HttpOnly = true; // Güvenlik için (Javascript erişemez)
@@ -25,7 +25,7 @@ builder.Services.AddControllersWithViews();
 // ASENKRON MAİL MOTORU
 builder.Services.AddHostedService<MailBackgroundWorker>();
 
-// 🔥🔥 EPPlus 8+ KESİN ÇÖZÜM (Ortam Değişkeni) 🔥🔥
+// EPPlus 8+ lisans yapılandırması (NonCommercial ortam değişkeni)
 Environment.SetEnvironmentVariable("EPPlusLicenseContext", "NonCommercial");
 
 var app = builder.Build();

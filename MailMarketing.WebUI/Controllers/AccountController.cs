@@ -106,7 +106,7 @@ public class AccountController : Controller
             DateTime expiryTime = DateTime.Parse(expiryStr);
             if (DateTime.Now > expiryTime)
             {
-                ViewBag.Error = "Girdiğiniz kodun süresi dolmuş! Lütfen yeni kod isteyin. ❌";
+                ViewBag.Error = "Girdiğiniz kodun süresi dolmuş. Lütfen yeni kod isteyin.";
                 TempData.Keep(); 
                 ViewBag.Step = 2;
                 ViewBag.Email = (JsonSerializer.Deserialize<User>(userDataJson!))?.Email;
@@ -240,7 +240,7 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult ForgotPassword() => View();
 
-    // 🔥 GÜNCELLENEN ŞİFRE SIFIRLAMA (BAŞLANGIÇ)
+    // Şifre sıfırlama (başlangıç)
     [HttpPost]
     public IActionResult ForgotPassword(string email)
     {
@@ -249,7 +249,7 @@ public class AccountController : Controller
         {
             string verificationCode = new Random().Next(100000, 999999).ToString();
             
-            // 🔥 SÜRE VE KOD AYARLARI
+            // Süre ve kod ayarları
             TempData["PassVerifyExpiry"] = DateTime.Now.AddSeconds(60).ToString();
             TempData["VerificationCode"] = verificationCode;
             TempData["TargetEmail"] = email;
@@ -257,7 +257,7 @@ public class AccountController : Controller
 
             try 
             {
-                // 🔥 YENİ ŞIK MAIL METODU
+                // şifre sıfırlama kodunu gönder
                 _mailService.SendForgotPasswordCode(email, verificationCode);
             }
             catch (Exception ex)
@@ -274,7 +274,7 @@ public class AccountController : Controller
         return View();
     }
 
-    // 🔥 GÜNCELLENEN DOĞRULAMA (SÜRE KONTROLÜ)
+    // Doğrulama (Süre kontrolcü)
     [HttpPost]
     public IActionResult VerifyCode(string email, string code)
     {
@@ -294,7 +294,7 @@ public class AccountController : Controller
 
         if (remainingSeconds == 0)
         {
-            ViewBag.Error = "Kodun süresi dolmuş! Lütfen yeni kod isteyin. ❌";
+            ViewBag.Error = "Kodun süresi dolmuş. Lütfen yeni kod isteyin.";
             ViewBag.Step = 2;
             ViewBag.Email = email;
             ViewBag.RemainingTime = 0;
@@ -317,7 +317,7 @@ public class AccountController : Controller
         return View("ForgotPassword");
     }
 
-    // 🔥 YENİ: ŞİFRE KODUNU TEKRAR GÖNDER (AJAX)
+    // şifre kodunu yeniden gönder (AJAX)
     [HttpPost]
     public IActionResult ResendForgotPasswordCode()
     {

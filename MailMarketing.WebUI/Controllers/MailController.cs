@@ -33,18 +33,17 @@ public class MailController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        // 🔥 3. KRİTİK DÜZELTME: 
-        // SendBulkMail artık 'User' nesnesi değil, 'int currentUserId' istiyor.
+        // 3. Mail gönderimini başlat
         string result = _mailService.SendBulkMail(templateId, subscriberIds, currentUserId);
 
         // 4. Sonuca göre kullanıcıya bilgi veriyoruz
         if (result == "OK")
         {
-            TempData["Message"] = $"{subscriberIds.Length} kişiye gönderim başarıyla başlatıldı! 🚀";
+            TempData["Message"] = $"{subscriberIds.Length} kişiye gönderim başarıyla başlatıldı.";
         }
         else
         {
-            // Servisten dönen hatayı (Örn: SMTP ayarları eksik) burada gösteriyoruz
+            // Servisten dönen hata mesajını (orn: SMTP ayarları eksik) kullanıcıya gösteriyoruz
             TempData["ErrorMessage"] = result;
         }
 

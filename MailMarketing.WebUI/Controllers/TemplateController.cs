@@ -20,7 +20,7 @@ public class TemplateController : Controller
     private readonly MailService _mailService = new MailService();
     private readonly MailMarketingContext _context = new MailMarketingContext();
 
-    // 📊 1. ŞABLON LİSTESİ
+    // 1. Şablon Listesi
     public IActionResult Index(string? searchString, string? status, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -60,7 +60,7 @@ public class TemplateController : Controller
         return View(templates);
     }
 
-    // 🔥 WORD DOSYASINI İÇE AKTAR
+    // Word dosyasını içe aktar
     [HttpPost]
     public IActionResult ImportFromWord(IFormFile wordFile)
     {
@@ -86,10 +86,10 @@ public class TemplateController : Controller
                     Content = result.Value 
                 };
 
-                // 🔥 LOG: Word aktarımı
-                LogManager.LogAction(currentUserId, "Word Aktarımı", $"'{wordFile.FileName}' dosyasından şablon içeriği başarıyla aktarıldı.");
+                // Log: Word Import
+                LogManager.LogAction(currentUserId, "Word Import", $"Template content successfully imported from '{wordFile.FileName}'.");
 
-                TempData["Message"] = "Word dokümanı başarıyla aktarıldı! Şimdi son kontrolleri yapabilirsin. 📄✨";
+                TempData["Message"] = "Word document successfully imported. You can now perform final checks.";
                 return View("Create", importedTemplate);
             }
         }
@@ -113,11 +113,11 @@ public class TemplateController : Controller
             _context.Templates.Update(template);
             _context.SaveChanges();
 
-            // 🔥 LOG: Şablon durumu (pasife/aktife alma)
+            // Log: Şablon durumu (pasife/aktife alma)
             string statusText = template.IsActive ? "aktife" : "pasife";
             LogManager.LogAction(currentUserId, "Şablon Durumu Değişti", $"'{template.Title}' şablonu {statusText} alındı.");
             
-            TempData["Message"] = $"Şablon durumu '{statusText}' olarak güncellendi. ✅";
+            TempData["Message"] = $"Şablon durumu '{statusText}' olarak güncellendi.";
         }
         return RedirectToAction("Index");
     }
@@ -141,11 +141,11 @@ public class TemplateController : Controller
             }
             db.SaveChanges();
 
-            // 🔥 LOG: Toplu silme
+            // Log: Toplu silme
             LogManager.LogAction(currentUserId, "Toplu Şablon Silme", $"{deleted} adet şablon silindi, {skipped} adet şablon kullanımda olduğu için atlandı.");
 
             if (skipped > 0) TempData["Error"] = $"{skipped} adet şablon gönderim geçmişi olduğu için silinemedi.";
-            else TempData["Message"] = "Seçilen şablonlar başarıyla silindi. ✅";
+            else TempData["Message"] = "Seçilen şablonlar başarıyla silindi.";
         }
         return RedirectToAction("Index");
     }
@@ -162,10 +162,10 @@ public class TemplateController : Controller
             foreach (var item in items) item.IsActive = true;
             db.SaveChanges();
 
-            // 🔥 LOG: Toplu aktivasyon
+            // Log: Toplu aktivasyon
             LogManager.LogAction(currentUserId, "Toplu Şablon Aktivasyonu", $"{items.Count} adet şablon toplu olarak aktife çekildi.");
 
-            TempData["Message"] = $"{items.Count} şablon aktifleştirildi. 🟢";
+            TempData["Message"] = $"{items.Count} şablon aktifleştirildi.";
         }
         return RedirectToAction("Index");
     }
@@ -182,10 +182,10 @@ public class TemplateController : Controller
             foreach (var item in items) item.IsActive = false;
             db.SaveChanges();
 
-            // 🔥 LOG: Toplu deaktivasyon
+            // Log: Toplu deaktivasyon
             LogManager.LogAction(currentUserId, "Toplu Şablon Deaktivasyonu", $"{items.Count} adet şablon toplu olarak pasife çekildi.");
 
-            TempData["Message"] = $"{items.Count} şablon pasife alındı. 🟠";
+            TempData["Message"] = $"{items.Count} şablon pasife alındı.";
         }
         return RedirectToAction("Index");
     }
@@ -208,10 +208,10 @@ public class TemplateController : Controller
             string result = _templateManager.Add(template);
             if (result == "OK")
             {
-                // 🔥 LOG: Şablon oluşturma
+                // Log: Şablon oluşturma
                 LogManager.LogAction(currentUserId, "Şablon Oluşturuldu", $"'{template.Title}' isimli yeni bir şablon oluşturuldu.");
                 
-                TempData["Message"] = "Şablon başarıyla kaydedildi! 🎨";
+                TempData["Message"] = "Şablon başarıyla kaydedildi.";
                 return RedirectToAction("Index");
             }
             else
@@ -237,22 +237,22 @@ public class TemplateController : Controller
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentUserId = int.Parse(sid!);
-        template.UserId = currentUserId; // UserId set etmeyi unutmayalım
+        template.UserId = currentUserId;
 
         string result = _templateManager.Update(template);
 
         if (result == "OK")
         {
-            // 🔥 LOG: Şablon düzenleme
+            // Log: Şablon düzenleme
             LogManager.LogAction(currentUserId, "Şablon Düzenlendi", $"'{template.Title}' isimli şablon güncellendi.");
             
-            TempData["Message"] = "Şablon güncellendi! 📝";
+            TempData["Message"] = "Şablon güncellendi.";
             return RedirectToAction("Index");
         }
         else
         {
             TempData["Error"] = result;
-            return RedirectToAction("Index"); // Veya View(template) dönebiliriz ama mevcut yapı Index'e atıyor
+            return RedirectToAction("Index");
         }
     }
 
@@ -274,10 +274,10 @@ public class TemplateController : Controller
             _context.Templates.Remove(template);
             _context.SaveChanges();
             
-            // 🔥 LOG: Şablon silme
+            // Log: Şablon silme
             LogManager.LogAction(currentUserId, "Şablon Silindi", $"'{title}' isimli şablon sistemden kaldırıldı.");
             
-            TempData["Message"] = "Şablon silindi! 🗑️";
+            TempData["Message"] = "Şablon silindi.";
         }
         return RedirectToAction("Index");
     }
@@ -320,10 +320,10 @@ public class TemplateController : Controller
 
         if (result == "OK")
         {
-            // 🔥 LOG: Şablon ismi ve kişi sayısı detayı
+            // Log: Şablon ismi ve kişi sayısı detayı
             LogManager.LogAction(currentUserId, "Mail Gönderildi", $"'{template.Title}' şablonu kullanılarak {subscriberIds.Length} kişiye toplu mail gönderildi.");
             
-            TempData["Message"] = "Mail gönderimi başarıyla başlatıldı! 🚀";
+            TempData["Message"] = "Mail gönderimi başarıyla başlatıldı.";
             return RedirectToAction("Index");
         }
         

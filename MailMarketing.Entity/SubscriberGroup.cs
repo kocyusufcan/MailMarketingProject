@@ -6,6 +6,7 @@ public class SubscriberGroup
     public string GroupName { get; set; } = null!;
     public int UserId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsSystem { get; set; } = false;
 
     // İlişkiler
     public virtual User? User { get; set; }

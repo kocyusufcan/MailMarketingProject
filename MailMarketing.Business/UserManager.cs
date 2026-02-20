@@ -37,6 +37,17 @@ public class UserManager
         _context.Users.Add(user);
         _context.SaveChanges();
 
+        // Yeni kullanıcı için "Tüm Aboneler" sistem klasörünü otomatik oluştur
+        var allSubscribersGroup = new MailMarketing.Entity.SubscriberGroup
+        {
+            GroupName = "Tüm Aboneler",
+            UserId = user.Id,
+            CreatedAt = DateTime.Now,
+            IsSystem = true
+        };
+        _context.SubscriberGroups.Add(allSubscribersGroup);
+        _context.SaveChanges();
+
         return "OK";
     }
 

@@ -75,6 +75,24 @@ public class SubscriberManager
             subscriber.CreatedDate = DateTime.Now;
             _context.Subscribers.Add(subscriber);
             _context.SaveChanges();
+
+            // Abone kaydedilince "Tüm Aboneler" sistem klasörüne de otomatik ekle
+            var systemGroup = _context.SubscriberGroups
+                .FirstOrDefault(g => g.UserId == subscriber.UserId && g.IsSystem);
+            if (systemGroup != null)
+            {
+                bool alreadyInGroup = _context.SubscriberGroupMembers
+                    .Any(m => m.GroupId == systemGroup.Id && m.SubscriberId == subscriber.Id);
+                if (!alreadyInGroup)
+                {
+                    _context.SubscriberGroupMembers.Add(new MailMarketing.Entity.SubscriberGroupMember
+                    {
+                        GroupId = systemGroup.Id,
+                        SubscriberId = subscriber.Id
+                    });
+                    _context.SaveChanges();
+                }
+            }
             return "OK";
         }
         catch (Exception)

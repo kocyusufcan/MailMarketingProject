@@ -30,6 +30,31 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     }
 
+    /* 📌 SİSTEM KLASÖRÜ (Tüm Aboneler) */
+    .folder-card.is-system {
+        border-color: #6f42c1;
+        background: linear-gradient(135deg, #f8f5ff 0%, #ede9ff 100%);
+    }
+    .folder-card.is-system .folder-icon-wrapper {
+        background: rgba(111, 66, 193, 0.1);
+    }
+    .folder-card.is-system .folder-icon {
+        color: #6f42c1;
+    }
+    .folder-card.is-system:hover {
+        box-shadow: 0 10px 25px rgba(111, 66, 193, 0.2);
+    }
+    .system-badge {
+        font-size: 0.65rem;
+        background: #6f42c1;
+        color: white;
+        border-radius: 20px;
+        padding: 2px 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+
     /* 🔘 CHECKBOX */
     .folder-checkbox-area {
         position: absolute;
@@ -117,27 +142,56 @@
         @foreach (var group in Model)
         {
             <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card h-100 folder-card text-center p-4 shadow-sm" data-id="@group.Id" onclick="handleFolderClick(this, @group.Id)">
+                <div class="card h-100 folder-card text-center p-4 shadow-sm @(group.IsSystem ? "is-system" : "")" 
+                     data-id="@group.Id" 
+                     data-is-system="@group.IsSystem.ToString().ToLower()"
+                     onclick="handleFolderClick(this, @group.Id)">
                     
-                    @* Checkbox *@
-                    <div class="folder-checkbox-area">
-                        <input type="checkbox" class="form-check-input folder-checkbox" 
-                               value="@group.Id" onclick="event.stopPropagation(); toggleSelection(this);">
-                    </div>
+                    @* Checkbox — sistem klasöründe gizli *@
+                    @if (!group.IsSystem)
+                    {
+                        <div class="folder-checkbox-area">
+                            <input type="checkbox" class="form-check-input folder-checkbox" 
+                                   value="@group.Id" onclick="event.stopPropagation(); toggleSelection(this);">
+                        </div>
+                    }
 
-                    @* Düzenle Butonu *@
-                    <div class="folder-edit-area" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-                        <button class="btn btn-sm btn-light border rounded-circle shadow-sm" 
-                                onclick="renameGroup(@group.Id, '@group.GroupName', event)" title="İsmi Değiştir">
-                            <i class="fas fa-pen text-secondary small"></i>
-                        </button>
-                    </div>
+                    @* Düzenle Butonu — sistem klasöründe gizli *@
+                    @if (!group.IsSystem)
+                    {
+                        <div class="folder-edit-area" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm" 
+                                    onclick="renameGroup(@group.Id, '@group.GroupName', event)" title="İsmi Değiştir">
+                                <i class="fas fa-pen text-secondary small"></i>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        @* Kilit rozeti *@
+                        <div style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+                            <span class="system-badge"><i class="fas fa-lock"></i> Sistem</span>
+                        </div>
+                    }
 
                     <div class="folder-icon-wrapper mt-2">
-                        <i class="fas fa-folder-open folder-icon"></i>
+                        @if (group.IsSystem)
+                        {
+                            <i class="fas fa-users folder-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-folder-open folder-icon"></i>
+                        }
                     </div>
 
-                    <h5 class="fw-bold text-dark mb-2">@group.GroupName</h5>
+                    <h5 class="fw-bold text-dark mb-2">
+                        @group.GroupName
+                        @if (group.IsSystem)
+                        {
+                            <i class="fas fa-thumbtack text-primary ms-1 small" title="Sabitlenmiş"></i>
+                        }
+                    </h5>
                     <span class="badge bg-light text-secondary rounded-pill px-3 py-1 border small">
                         <i class="fas fa-users me-1 small"></i> @(counts.ContainsKey(group.Id) ? counts[group.Id] : 0) Abone
                     </span>
@@ -252,6 +306,13 @@
         function toggleSelection(checkbox) {
             const id = checkbox.value;
             const card = checkbox.closest('.folder-card');
+            
+            // Sistem klasörü seçilemez
+            if (card.dataset.isSystem === 'true') {
+                checkbox.checked = false;
+                return;
+            }
+
             let selectedIds = getStoredFolderIds();
 
             if (checkbox.checked) {

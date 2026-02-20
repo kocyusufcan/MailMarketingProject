@@ -134,7 +134,7 @@ public class MailLogController : Controller
 
             var data = query.OrderByDescending(l => l.SentDate).AsNoTracking().ToList();
 
-            // 🔥 YENİ: Şablon ismini ID'den buluyoruz
+            // Şablon ismini ID'den bul ve log detayına ekle
             string templateName = "Tümü";
             if (templateId.HasValue && templateId > 0)
             {
@@ -142,7 +142,7 @@ public class MailLogController : Controller
                 templateName = temp?.Title ?? "Bilinmeyen Şablon";
             }
 
-            // 🔥 LOG: Artık ID yerine isim yazıyoruz
+            // Log: Filtre detaylarını yaz
             string filterInfo = $"Durum: {status}";
             if (templateId.HasValue && templateId > 0) filterInfo += $", Şablon: {templateName}";
             if (startDate.HasValue) filterInfo += $", Başlangıç: {startDate.Value:dd.MM.yyyy}";

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Hoş Geldiniz";
 }
 
-@* --- 🔔 BİLDİRİM SİSTEMİ (SweetAlert2) --- *@
+@* --- Bildirim Sistemi (SweetAlert2) --- *@
 @if (TempData["Error"] != null)
 {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -50,7 +50,7 @@
             <div class="card border-0 shadow-lg p-4 mt-4 mt-md-0" style="border-radius: 20px;">
                 <div class="card-body">
                     
-                    @* --- ADIM 2: ABONELİK DOĞRULAMA (KOD EKRANI) --- *@
+                    @* --- Adım 2: Abonelik Doğrulama (Kod Ekranı) --- *@
                     @if (ViewBag.Step == 2)
                     {
                         <div class="text-center">
@@ -79,7 +79,7 @@
                             </div>
                         </div>
                     }
-                    @* --- ADIM 1: ABONELİK FORMU (VİTRİN) --- *@
+                    @* --- Adım 1: Abonelik Formu (Vitrin) --- *@
                     else
                     {
                         <h3 class="card-title mb-4 fw-bold text-dark">Bültene Katılın</h3>
@@ -102,21 +102,143 @@
 
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">BÜLTEN SEÇİNİZ</label>
-                                <select name="targetUserId" class="form-select shadow-sm rounded-3" required>
-                                    <option value="" selected disabled>Yayıncı seçiniz...</option>
-                                    @if (Model != null)
-                                    {
-                                        foreach (var user in Model)
-                                        {
-                                            var gosterilecekAd = string.IsNullOrWhiteSpace(user.BrandName) 
-                                                                 ? $"{user.FirstName} {user.LastName}" 
-                                                                 : user.BrandName;
-                                                                 
-                                            <option value="@user.Id">@gosterilecekAd</option>
-                                        }
-                                    }
-                                </select>
+                                
+                                <!-- Custom Dropdown Start -->
+                                <div class="position-relative">
+                                    <input type="hidden" name="targetUserId" id="targetUserId" required>
+                                    
+                                    <div class="dropdown w-100">
+                                        <button class="btn btn-light w-100 text-start border shadow-sm d-flex justify-content-between align-items-center" 
+                                                type="button" id="publisherDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" 
+                                                style="border-radius: 0.5rem; padding: 0.7rem 1rem;">
+                                            <span id="selectedPublisherText" class="text-muted">Yayıncı seçiniz...</span>
+                                            <i class="fas fa-chevron-down small text-secondary"></i>
+                                        </button>
+                                        
+                                        <div class="dropdown-menu w-100 p-3 shadow-lg border-0" aria-labelledby="publisherDropdownBtn" style="border-radius: 12px;">
+                                            <div class="mb-2 position-relative">
+                                                <i class="fas fa-search position-absolute text-muted" style="left: 10px; top: 10px;"></i>
+                                                <input type="text" class="form-control ps-4" id="publisherSearchInput" placeholder="Yayıncı Ara..." style="font-size: 0.9rem;">
+                                            </div>
+                                            
+                                            <div id="publisherListContainer" style="max-height: 200px; overflow-y: auto;">
+                                                <!-- Yayıncılar AJAX ile buraya gelecek -->
+                                                <div class="text-center py-2 text-muted small"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</div>
+                                            </div>
+                                            
+                                            <div class="text-center pt-2 border-top mt-2" id="loadMoreContainer" style="display: none;">
+                                                <button type="button" class="btn btn-sm btn-link text-decoration-none" id="btnLoadMorePublishers">
+                                                    Daha Fazla Göster <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Custom Dropdown End -->
+
                             </div>
+
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    let currentPage = 1;
+                                    let currentTerm = "";
+                                    let isLoading = false;
+                                    let hasMore = true;
+
+                                    const dropdownBtn = document.getElementById("publisherDropdownBtn");
+                                    const dropdownMenu = document.querySelector(".dropdown-menu");
+                                    const searchInput = document.getElementById("publisherSearchInput");
+                                    const listContainer = document.getElementById("publisherListContainer");
+                                    const loadMoreBtn = document.getElementById("btnLoadMorePublishers");
+                                    const loadMoreContainer = document.getElementById("loadMoreContainer");
+                                    const hiddenInput = document.getElementById("targetUserId");
+                                    const selectedText = document.getElementById("selectedPublisherText");
+
+                                    // İlk yükleme
+                                    loadPublishers();
+
+                                    // Arama yapıldığında
+                                    searchInput.addEventListener("input", function() {
+                                        currentTerm = this.value;
+                                        currentPage = 1;
+                                        hasMore = true;
+                                        listContainer.innerHTML = '<div class="text-center py-2 text-muted small"><i class="fas fa-spinner fa-spin"></i> Aranıyor...</div>';
+                                        loadPublishers();
+                                    });
+
+                                    // Daha fazla yükle
+                                    loadMoreBtn.addEventListener("click", function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation(); // Menü kapanmasın
+                                        if(!isLoading && hasMore) {
+                                            currentPage++;
+                                            loadPublishers(true);
+                                        }
+                                    });
+
+                                    // Dropdown içinde tıklandığında kapanmasını engelle (input ve buton hariç)
+                                    dropdownMenu.addEventListener("click", function(e) {
+                                        e.stopPropagation();
+                                    });
+
+                                    function loadPublishers(append = false) {
+                                        if (isLoading) return;
+                                        isLoading = true;
+
+                                        fetch(`/Home/SearchPublicUsers?term=${currentTerm}&page=${currentPage}`)
+                                            .then(response => {
+                                                if (!response.ok) throw new Error("Ağ hatası");
+                                                return response.json();
+                                            })
+                                            .then(data => {
+                                                if (!append) listContainer.innerHTML = "";
+                                                
+                                                if (data.items.length === 0 && !append) {
+                                                    listContainer.innerHTML = '<div class="text-center py-2 text-muted small">Kayıtlı yayıncı bulunmuyor.</div>';
+                                                    loadMoreContainer.style.display = "none";
+                                                    isLoading = false;
+                                                    return;
+                                                }
+
+                                                data.items.forEach(user => {
+                                                    const item = document.createElement("button");
+                                                    item.type = "button";
+                                                    item.className = "dropdown-item py-2 d-flex align-items-center justify-content-between";
+                                                    item.innerHTML = `<span>${user.name}</span>`;
+                                                    item.onclick = function() {
+                                                        selectPublisher(user.id, user.name);
+                                                    };
+                                                    listContainer.appendChild(item);
+                                                });
+
+                                                // Daha fazla var mı?
+                                                hasMore = (data.page * data.pageSize) < data.totalCount;
+                                                loadMoreContainer.style.display = hasMore ? "block" : "none";
+                                                
+                                                isLoading = false;
+                                            })
+                                            .catch(err => {
+                                                console.error("Yayıncı yükleme hatası:", err);
+                                                // Hata olsa bile kullanıcıya korkutucu mesaj göstermek yerine boş liste gibi davranabiliriz
+                                                // veya daha yumuşak bir hata mesajı verebiliriz.
+                                                if (!append) listContainer.innerHTML = '<div class="text-center py-2 text-muted small">Yayıncılar yüklenirken bir sorun oluştu.</div>';
+                                                isLoading = false;
+                                            });
+                                    }
+
+                                    function selectPublisher(id, name) {
+                                        hiddenInput.value = id;
+                                        selectedText.textContent = name;
+                                        selectedText.classList.remove("text-muted");
+                                        selectedText.classList.add("text-dark", "fw-bold");
+                                        
+                                        // Dropdown'ı kapat (jQuery bootstrapsiz)
+                                        const bsDropdown = bootstrap.Dropdown.getInstance(dropdownBtn);
+                                        if(bsDropdown) bsDropdown.hide();
+                                        else dropdownBtn.click(); // Fallback
+                                    }
+                                });
+                            </script>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mt-2 rounded-pill fw-bold">
                                 <i class="fas fa-paper-plane me-2"></i> Hemen Abone Ol

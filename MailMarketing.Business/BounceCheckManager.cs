@@ -18,7 +18,7 @@ public class BounceCheckManager
     {
         using (var db = new MailMarketingContext())
         {
-            // 🔥 1. AYARLARI SETTINGS TABLOSUNDAN ÇEKİYORUZ
+            // 1. Ayarları Settings tablosundan çekiyoruz
             var settings = db.Settings.FirstOrDefault(s => s.UserId == user.Id);
             
             if (settings == null || string.IsNullOrEmpty(settings.Email) || string.IsNullOrEmpty(settings.Password))
@@ -26,7 +26,7 @@ public class BounceCheckManager
 
             try
             {
-                // 🔥 2. ŞİFREYİ ÇÖZ
+                // 2. Şifreyi çöz
                 string decryptedPassword = "";
                 try {
                     decryptedPassword = SecurityHelper.Decrypt(settings.Password ?? "").Trim();
@@ -34,14 +34,13 @@ public class BounceCheckManager
                     decryptedPassword = settings.Password ?? "";
                 }
 
-                // 🔥 3. SUNUCUYU DİNAMİK YAP (SMTP -> IMAP ÇEVİRİSİ)
-                // 🔥 3. SUNUCUYU DİNAMİK YAP (SMTP -> IMAP ÇEVİRİSİ ve FALLBACK)
+                // 3. Sunucuyu dinamik yap (SMTP -> IMAP Çevirisi ve Fallback)
                 string smtpHost = settings.MailServer ?? "smtp.gmail.com";
                 string[] prefixes = { "imap.", "mail.", "" }; // "" -> direkt smtp.site.com
                 string baseHost = smtpHost.StartsWith("smtp.") ? smtpHost.Substring(5) : smtpHost;
                 
                 bool connected = false;
-                Exception lastException = null;
+                Exception? lastException = null;
 
                 using (var client = new ImapClient())
                 {
@@ -117,10 +116,8 @@ public class BounceCheckManager
                                     foundEmail.Contains("google.com") || 
                                     foundEmail.Contains("microsoft.com")) continue;
 
-                                // Bu kullanıcıya ait aktif aboneyi bul
-
-                                // Sadece BU kullanıcıya ait aktif aboneyi bul
-                                // 🔥 s.Email != null kontrolü ekleyerek CS8602 uyarısını çözüyoruz
+                                // Sadece bu kullanıcıya ait aktif aboneyi bul
+                                // s.Email != null kontrolü ekleyerek CS8602 uyarısını çözüyoruz
                                 var subscriber = db.Subscribers.FirstOrDefault(s => 
                                 s.Email != null && 
                                 s.Email.ToLower() == foundEmail && 
@@ -147,7 +144,7 @@ public class BounceCheckManager
                                     db.Notifications.Add(new Notification
                                     {
                                         Title = "İletim Hatası",
-                                        // 🔥 FirstName ve LastName null ise boşluk bırak (?? "")
+                                        // FirstName ve LastName null ise boşluk bırak (?? "")
                                         Message = $"{(subscriber.FirstName ?? "")} {(subscriber.LastName ?? "")} ({subscriber.Email}) maili geri döndü ve pasife alındı.",
                                         CreatedAt = DateTime.Now,
                                         IsRead = false,

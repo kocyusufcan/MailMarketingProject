@@ -28,7 +28,7 @@ public class SettingController : Controller
             }
             else
             {
-                // 🔥 KRİTİK DÜZELTME: Şifreyi kullanıcıya göstermeden önce ÇÖZÜYORUZ
+                // Şifreyi kullanıcıya göstermeden önce çözüyöruz
                 if (!string.IsNullOrEmpty(setting.Password))
                 {
                     try 
@@ -46,7 +46,7 @@ public class SettingController : Controller
         }
     }
 
-    // AYARLARI KAYDETME (POST)
+    // POST: Update settings
     [HttpPost]
     public IActionResult Update(Setting model)
     {
@@ -67,7 +67,7 @@ public class SettingController : Controller
                     model.Password = SecurityHelper.Encrypt(model.Password);
 
                 db.Settings.Add(model);
-                TempData["Message"] = "SMTP ayarlarınız başarıyla oluşturuldu! 🚀";
+                TempData["Message"] = "SMTP settings created successfully.";
             }
             else
             {
@@ -77,14 +77,14 @@ public class SettingController : Controller
                 existingSetting.EnableSSL = model.EnableSSL;
                 existingSetting.Email = model.Email;
                 
-                // 🔥 EĞER ŞİFRE ALANI DOLUYSA:
-                // Kullanıcı yeni bir şifre yazmış demektir, onu şifrele ve öyle kaydet
+                // Eğer şifre alanı doluysa:
+                // Kullanıcı yeni bir şifre yazmış demektir, şifrelenerek kaydedilir.
                 if (!string.IsNullOrEmpty(model.Password))
                 {
                     existingSetting.Password = SecurityHelper.Encrypt(model.Password);
                 }
 
-                TempData["Message"] = "SMTP ayarlarınız başarıyla güncellendi! ✅";
+                TempData["Message"] = "SMTP settings updated successfully.";
             }
 
             db.SaveChanges();

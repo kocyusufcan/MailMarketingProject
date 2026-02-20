@@ -128,11 +128,11 @@ public class UserController : Controller
 
                 string verCode = new Random().Next(100000, 999999).ToString();
                 
-                // 🔥 SÜRE BAŞLANGICI
+                // Süre başlangıcı
                 TempData["EmailVerifyExpiry"] = DateTime.Now.AddSeconds(60).ToString();
                 TempData["EmailVerifyCode"] = verCode; 
                 
-                // 🔥 ÖNEMLİ: Kime mail atacağımızı kaydediyoruz (Resend için gerekli)
+                // Önemli: Kime mail atılacağını TempData'ya kaydediyoruz (Resend için gerekli)
                 TempData["PendingEmail"] = cleanEmail;
 
                 try {
@@ -156,7 +156,7 @@ public class UserController : Controller
             db.SaveChanges();
 
             LogManager.LogAction(userInDb.Id, "Profil Güncellendi", $"Kullanıcı profil bilgilerini ({userInDb.Email}) güncelledi.");
-            TempData["Message"] = "Profil başarıyla güncellendi! ✅";
+            TempData["Message"] = "Profil başarıyla güncellendi.";
             
             return RedirectToAction("Profile");
         }
@@ -180,7 +180,7 @@ public class UserController : Controller
             TempData.Keep("EmailVerifyCode");
             TempData.Keep("PendingEmail"); // E-postayı da koru
 
-            // 🔥 KALAN SÜREYİ HESAPLA
+            // Kalan süreyi hesapla
             int remainingSeconds = 0;
             if (!string.IsNullOrEmpty(expiryStr))
             {
@@ -195,7 +195,7 @@ public class UserController : Controller
             // 1. SÜRE KONTROLÜ
             if (remainingSeconds == 0)
             {
-                TempData["Error"] = "Kodun süresi dolmuş! Lütfen 'Yeni Kod Gönder' butonunu kullanın. ❌";
+                TempData["Error"] = "Kodun süresi dolmuş. Lütfen 'Yeni Kod Gönder' butonunu kullanın.";
                 
                 ViewBag.Step = 2;
                 ViewBag.TimerExpired = true; 
@@ -218,7 +218,7 @@ public class UserController : Controller
                 TempData["Error"] = "Girdiğiniz doğrulama kodu hatalı!";
                 
                 ViewBag.Step = 2;
-                // TimerExpired YOK -> Süre devam etsin
+                // TimerExpired yok -> Süre devam etsin
                 
                 ViewBag.CorrectCode = codeToVerify;
                 ViewBag.NewEmail = newEmail;
@@ -250,7 +250,7 @@ public class UserController : Controller
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
                 
-                TempData["Message"] = "E-posta adresiniz doğrulandı ve profiliniz güncellendi! 🚀";
+                TempData["Message"] = "E-posta adresiniz doğrulandı ve profiliniz güncellendi.";
                 
                 // Başarılı olunca temp verileri silebiliriz (Otomatik silinir zaten)
             }
@@ -258,7 +258,7 @@ public class UserController : Controller
         return RedirectToAction("Profile");
     }
 
-    // 🔥 DÜZELTİLEN METOD: YENİDEN KOD GÖNDERME
+    // Yeniden kod gönderme
     [HttpPost]
     public IActionResult ResendVerifyCode()
     {
@@ -278,7 +278,7 @@ public class UserController : Controller
         TempData["PendingEmail"] = targetEmail; // Tekrar sakla
         TempData.Keep(); 
 
-        // 3. 🔥 MAİLİ GERÇEKTEN GÖNDER
+        // 3. Kodu gönder
         try {
             _mailService.SendEmailChangeCode(targetEmail, newCode);
             return Json(new { success = true, message = "Kod gönderildi." });
@@ -334,7 +334,7 @@ public class UserController : Controller
                 db.SaveChanges();
 
                 LogManager.LogAction(currentUser.Id, "Firma Değişikliği", $"Kullanıcı '{oldRootName}' ekibinden ayrılıp '{rootAdminOfNewTeam.FirstName}' organizasyonuna katıldı.");
-                TempData["Message"] = "Organizasyon geçişi başarılı! ✅";
+                TempData["Message"] = "Organizasyon geçişi başarılı.";
             }
         }
         return RedirectToAction("Profile");
@@ -449,7 +449,7 @@ public class UserController : Controller
 
                 LogManager.LogAction(currentUserId, "Kullanıcı Silindi", $"'{targetEmail}' kullanıcısı ve tüm bağlı verileri kalıcı olarak silindi.");
                 
-                TempData["Message"] = "Kullanıcı ve bağlı tüm veriler başarıyla silindi. ✅"; 
+                TempData["Message"] = "Kullanıcı ve bağlı tüm veriler başarıyla silindi."; 
             }
         }
         return RedirectToAction("Index");
@@ -471,8 +471,6 @@ public class UserController : Controller
                 CleanupUserData(db, currentUserId);
                 db.Users.Remove(user);
                 db.SaveChanges();
-                
-                LogManager.LogAction(currentUserId, "Hesap Kapatıldı", $"Kullanıcı ({myEmail}) kendi hesabını kalıcı olarak sildi.");
             }
         }
 
