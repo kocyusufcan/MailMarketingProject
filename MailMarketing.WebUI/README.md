@@ -59,3 +59,4 @@ Web arayüzü doğrudan `MailMarketing.API` (Backend) katmanındaki veritabanı 
 
 ---
 *İşletme boyutuna göre tam kapasiteli MVC altyapısı.*
+

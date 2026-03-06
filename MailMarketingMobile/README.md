@@ -206,3 +206,4 @@ npx expo start
 ---
 
 *Sıfırdan tasarlanan, premium UI/UX anlayışıyla geliştirilen iOS/Android e-posta yönetim konsolu.*
+

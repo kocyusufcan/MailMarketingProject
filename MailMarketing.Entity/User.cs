@@ -1,4 +1,4 @@
-ï»¿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MailMarketing.Entity;
 
@@ -18,7 +18,7 @@ public class User
     public bool IsAdmin { get; set; } = false; 
     public bool IsPublic { get; set; } = false; 
 
-    // âœ… BU Ä°KÄ°SÄ° BÄ°ZÄ°M TÃœM HÄ°YERARÅžÄ°YÄ° Ã‡Ã–ZÃœYOR
+    // ? BU ÝKÝSÝ BÝZÝM TÜM HÝYERARÞÝYÝ ÇÖZÜYOR
     public string? AdminInvitationCode { get; set; } 
     public int? ParentAdminId { get; set; }
 
@@ -40,3 +40,4 @@ public class User
         }
     }
 }
+// 

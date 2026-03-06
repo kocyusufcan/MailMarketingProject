@@ -133,3 +133,4 @@ Kurulum bittikten sonra sistemi hemen test etmek isterseniz, projenin kök dizin
 - **`Hos_Geldin_Sablonu_V2.docx`**: Word'den HTML'e şablon dönüştürme testi için.
 
 Artık her şey hazır! İyi pazarlamalar! 🚀🏆
+

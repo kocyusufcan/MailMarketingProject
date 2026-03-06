@@ -174,3 +174,4 @@ http://localhost:5034/swagger
 ---
 
 *Bu katman SOLID prensiplerini, Clean Code pratiklerini ve IDisposable pattern standartlarını benimseyerek geliştirilmiştir.*
+
