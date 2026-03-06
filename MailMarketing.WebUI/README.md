@@ -19,15 +19,15 @@ Kampanya yöneticilerinin, şirket içi personelin ve admin yetkisine sahip kull
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <video src="../uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" autoplay loop muted></video> | <video src="../uygulamadan_goruntuler/web/Aboneler.mp4" width="280" autoplay loop muted></video> | <video src="../uygulamadan_goruntuler/web/Raporlar.mp4" width="280" autoplay loop muted></video> |
+| <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Aboneler.mp4" width="280" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Raporlar.mp4" width="280" autoplay loop muted></video> |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="../uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" autoplay loop muted></video> | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" autoplay loop muted></video> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Şifre Yenileme |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="../uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="../uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> |
 
 ---
 

@@ -17,23 +17,23 @@ Bu dizin, **Email Marketing Suite** platformunun mobil yönetim uygulamasını i
 
 | Anasayfa & Navigasyon | Menü Navigasyon | Mobil Abone Yönetimi |
 | :---: | :---: | :---: |
-| <video src="../uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" autoplay loop muted></video> | <video src="../uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" autoplay loop muted></video> | <img src="../uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
+| <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" autoplay loop muted></video> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
 | Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
 
 | Aktivite Günlüğü | Sistem Bildirimleri | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
 
 | Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
 
 | Şifremi Unuttum | Kullanıcı Yönetimi | Profil Bilgilerim |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
+| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
 
 ---
 
