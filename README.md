@@ -24,23 +24,23 @@
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Aboneler.mp4" width="280" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Raporlar.mp4" width="280" autoplay loop muted></video> |
+| ![Anasayfa](uygulamadan_goruntuler/web/Anasayfa.mp4) | ![Aboneler](uygulamadan_goruntuler/web/Aboneler.mp4) | ![Raporlar](uygulamadan_goruntuler/web/Raporlar.mp4) |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" autoplay loop muted></video> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | ![Bildirim Geçmişi](uygulamadan_goruntuler/web/BildirimGecmisi.mp4) | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Klasör Yapısı |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/Klasorler.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="uygulamadan_goruntuler/web/Klasorler.png" width="280" /> |
 
-| Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
+| Giri Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/GirisYap.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/KayitOlAdmin.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/KayitOLKullanici.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/GirisYap.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KayitOlAdmin.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KayitOLKullanici.png" width="280" /> |
 
 | Şifremi Unuttum | Tanıtım Sayfası | Admin Kullanıcı Listesi |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/GirisOncesiAnasayfa.png" width="280" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/web/AdminPaneli.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> | <img src="uygulamadan_goruntuler/web/GirisOncesiAnasayfa.png" width="280" /> | <img src="uygulamadan_goruntuler/web/AdminPaneli.png" width="280" /> |
 
 ---
 
@@ -48,23 +48,23 @@
 
 | Mobil Anasayfa | Menü Navigasyon | Mobil Abone Yönetimi |
 | :---: | :---: | :---: |
-| <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" autoplay loop muted></video> | <video src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" autoplay loop muted></video> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
+| ![Mobil Anasayfa](uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4) | ![Menü](uygulamadan_goruntuler/mobile/MenuMobil.mp4) | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
 | Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
+| <img src="uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
 
 | Aktivite Günlüğü | Sistem Bildirimleri | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
+| <img src="uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
 
 | Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
+| <img src="uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
 
 | Şifremi Unuttum | Kullanıcı Yönetimi | Profil Bilgilerim |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="https://raw.githubusercontent.com/kocyusufcan/MailMarketingProject/main/uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
+| <img src="uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
 
 <br/>
   <img src="https://img.shields.io/badge/Entity_Framework_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="EF Core" />
