@@ -29,22 +29,22 @@
 
 | Raporlama Ekranı | Sistem Tanımları |
 | :---: | :---: |
-| <img src="docs/web/Raporlar.mp4" width="400" /> | <img src="docs/web/TanımSayfası.png" width="400" /> |
+| <img src="docs/web/Raporlar.mp4" width="400" /> | <img src="docs/web/TanimSayfasi.png" width="400" /> |
 | **Detaylı Bounce & Aktivite Geçmişi** | **Sunucu ve SMTP Tanımlamaları** |
 
 | Kullanıcı Profili | Aktivite Geçmişi |
 | :---: | :---: |
-| <img src="docs/web/ProfilBilgilerim.png" width="400" /> | <img src="docs/web/KullanıcıAktiviteGeçmişi.png" width="400" /> |
+| <img src="docs/web/ProfilBilgilerim.png" width="400" /> | <img src="docs/web/KullaniciAktiviteGecmisi.png" width="400" /> |
 | **Gelişmiş Profil & Şifre Yönetimi** | **Kullanıcı İşlem Logları (Admin)** |
 
 | Hazır Şablonlar | Bildirim Geçmişi |
 | :---: | :---: |
-| <img src="docs/web/Şablonlar.png" width="400" /> | <img src="docs/web/BildirimGeçmişi.mp4" width="400" /> |
+| <img src="docs/web/Sablonlar.png" width="400" /> | <img src="docs/web/BildirimGecmisi.mp4" width="400" /> |
 | **Özelleştirilebilir E-Posta Şablonları** | **Gerçek Zamanlı Sistem Bildirimleri** |
 
 | Giriş & Kayıt Ekranları | Admin Paneli Kullanıcıları | Şifre Yenileme |
 | :---: | :---: | :---: |
-| <img src="docs/web/GirişYap.png" width="280" /> | <img src="docs/web/AdminPaneli.png" width="280" /> | <img src="docs/web/ŞifremiUnuttum.png" width="280" /> |
+| <img src="docs/web/GirisYap.png" width="280" /> | <img src="docs/web/AdminPaneli.png" width="280" /> | <img src="docs/web/SifremiUnuttum.png" width="280" /> |
 
 <br/>
 
@@ -57,7 +57,7 @@
 
 | Mobil Yeni Gönderim (Kampanya) | Hazır Şablonlar |
 | :---: | :---: |
-| <img src="docs/mobile/GönderimMobil.jpeg" width="300" /> | <img src="docs/mobile/ŞablonlarımMobil.jpeg" width="300" /> |
+| <img src="docs/mobile/GonderimMobil.jpeg" width="300" /> | <img src="docs/mobile/SablonlarimMobil.jpeg" width="300" /> |
 | **Mobil Arayüzden Hızlı Gönderim** | **Şablon Görüntüleme & Seçimi** |
 
 | Raporlar & Analizler | Sistem Bildirimleri |
@@ -67,12 +67,12 @@
 
 | Kullanıcı Profili | Mobil Aktivite Günlüğü |
 | :---: | :---: |
-| <img src="docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="docs/mobile/AktiviteGünlüğüMobil.jpeg" width="300" /> |
+| <img src="docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="docs/mobile/AktiviteGunluguMobil.jpeg" width="300" /> |
 | **Detaylı Profil Yönetimi** | **Kullanıcı İşlem Geçmişi Takibi** |
 
 | Güvenli Giriş Ekranı | Hızlı Kayıt & Parola Sıfırlama |
 | :---: | :---: |
-| <img src="docs/mobile/GirişMobil.jpeg" width="300" /> | <img src="docs/mobile/ŞifremiUnuttumMobil.jpeg" width="300" /> |
+| <img src="docs/mobile/GirisMobil.jpeg" width="300" /> | <img src="docs/mobile/SifremiUnuttumMobil.jpeg" width="300" /> |
 | **Modern ve Güvenli Tasarım** | **Akıcı Kullanıcı Deneyimi** |
 
 <br/>

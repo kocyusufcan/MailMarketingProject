@@ -22,7 +22,7 @@ Bu dizin, **Email Marketing Suite** platformunun mobil yönetim uygulamasını i
 
 | Yeni Gönderim (Kampanya) | Hazır Şablonlar |
 | :---: | :---: |
-| <img src="../docs/mobile/GönderimMobil.jpeg" width="300" /> | <img src="../docs/mobile/ŞablonlarımMobil.jpeg" width="300" /> |
+| <img src="../docs/mobile/GonderimMobil.jpeg" width="300" /> | <img src="../docs/mobile/SablonlarimMobil.jpeg" width="300" /> |
 | **Hızlı Gönderim Akışı** | **Şablon Görüntüleme & Seçimi** |
 
 | Raporlar & Analizler | Sistem Bildirimleri |
@@ -32,12 +32,12 @@ Bu dizin, **Email Marketing Suite** platformunun mobil yönetim uygulamasını i
 
 | Kullanıcı Profili | Aktivite Günlüğü |
 | :---: | :---: |
-| <img src="../docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="../docs/mobile/AktiviteGünlüğüMobil.jpeg" width="300" /> |
+| <img src="../docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="../docs/mobile/AktiviteGunluguMobil.jpeg" width="300" /> |
 | **Detaylı Profil Yönetimi** | **Kullanıcı İşlem Geçmişi Takibi** |
 
 | Güvenli Giriş Ekranı | Şifre Sıfırlama |
 | :---: | :---: |
-| <img src="../docs/mobile/GirişMobil.jpeg" width="300" /> | <img src="../docs/mobile/ŞifremiUnuttumMobil.jpeg" width="300" /> |
+| <img src="../docs/mobile/GirisMobil.jpeg" width="300" /> | <img src="../docs/mobile/SifremiUnuttumMobil.jpeg" width="300" /> |
 | **Modern ve Güvenli Tasarım** | **Akıcı Parola Yenileme Akışı** |
 
 ---

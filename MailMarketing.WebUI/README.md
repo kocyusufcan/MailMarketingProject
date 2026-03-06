@@ -23,7 +23,7 @@ Kampanya yöneticilerinin, şirket içi personelin ve admin yetkisine sahip kull
 
 | Abone Yönetimi | Sistem Tanımları | Şifre Yenileme |
 | :---: | :---: | :---: |
-| <img src="../docs/web/Aboneler.mp4" width="280" /> | <img src="../docs/web/TanımSayfası.png" width="280" /> | <img src="../docs/web/ŞifremiUnuttum.png" width="280" /> |
+| <img src="../docs/web/Aboneler.mp4" width="280" /> | <img src="../docs/web/TanimSayfasi.png" width="280" /> | <img src="../docs/web/SifremiUnuttum.png" width="280" /> |
 
 ---
 
