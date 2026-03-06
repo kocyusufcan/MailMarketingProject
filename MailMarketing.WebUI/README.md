@@ -19,11 +19,11 @@ Kampanya yöneticilerinin, şirket içi personelin ve admin yetkisine sahip kull
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| ![Anasayfa](../uygulamadan_goruntuler/web/Anasayfa.mp4) | ![Aboneler](../uygulamadan_goruntuler/web/Aboneler.mp4) | ![Raporlar](../uygulamadan_goruntuler/web/Raporlar.mp4) |
+| <video src="../uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" controls autoplay loop muted playsinline></video> | <video src="../uygulamadan_goruntuler/web/Aboneler.mp4" width="280" controls autoplay loop muted playsinline></video> | <video src="../uygulamadan_goruntuler/web/Raporlar.mp4" width="280" controls autoplay loop muted playsinline></video> |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | ![Bildirim Geçmişi](../uygulamadan_goruntuler/web/BildirimGecmisi.mp4) | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="../uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" controls autoplay loop muted playsinline></video> | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Şifre Yenileme |
 | :---: | :---: | :---: |
