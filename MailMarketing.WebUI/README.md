@@ -19,11 +19,11 @@ Kampanya yöneticilerinin, şirket içi personelin ve admin yetkisine sahip kull
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Aboneler.mp4" width="280" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Raporlar.mp4" width="280" controls playsinline></video> |
+| <video src="https://github.com/user-attachments/assets/3d9ea6c4-0971-4f53-a2c7-dd72c69f51f1" width="280" controls playsinline></video> | <video src="https://github.com/user-attachments/assets/c3a82033-8ae4-4685-92c3-65b3b34ef7fa" width="280" controls playsinline></video> | <video src="https://github.com/user-attachments/assets/015cabd6-85bb-433d-9461-9b808f8276cb" width="280" controls playsinline></video> |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" controls playsinline></video> | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://github.com/user-attachments/assets/0846d925-f32c-4eb1-8afe-dfdf8648bf6b" width="280" controls playsinline></video> | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Şifre Yenileme |
 | :---: | :---: | :---: |
