@@ -24,11 +24,11 @@
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <video src="uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" controls autoplay loop muted playsinline></video> | <video src="uygulamadan_goruntuler/web/Aboneler.mp4" width="280" controls autoplay loop muted playsinline></video> | <video src="uygulamadan_goruntuler/web/Raporlar.mp4" width="280" controls autoplay loop muted playsinline></video> |
+| [▶ Oynat: Anasayfa](uygulamadan_goruntuler/web/Anasayfa.mp4) | [▶ Oynat: Aboneler](uygulamadan_goruntuler/web/Aboneler.mp4) | [▶ Oynat: Raporlar](uygulamadan_goruntuler/web/Raporlar.mp4) |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" controls autoplay loop muted playsinline></video> | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | [▶ Oynat: Bildirim Geçmişi](uygulamadan_goruntuler/web/BildirimGecmisi.mp4) | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Klasör Yapısı |
 | :---: | :---: | :---: |
@@ -48,7 +48,7 @@
 
 | Mobil Anasayfa | Menü Navigasyon | Mobil Abone Yönetimi |
 | :---: | :---: | :---: |
-| <video src="uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" controls autoplay loop muted playsinline></video> | <video src="uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" controls autoplay loop muted playsinline></video> | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
+| [▶ Oynat: Anasayfa (Mobil)](uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4) | [▶ Oynat: Menü (Mobil)](uygulamadan_goruntuler/mobile/MenuMobil.mp4) | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
 | Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
 | :---: | :---: | :---: |
