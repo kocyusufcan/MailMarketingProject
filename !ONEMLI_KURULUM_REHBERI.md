@@ -134,3 +134,4 @@ Kurulum bittikten sonra sistemi hemen test etmek isterseniz, projenin kök dizin
 
 Artık her şey hazır! İyi pazarlamalar! 🚀🏆
 
+ 

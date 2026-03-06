@@ -15,30 +15,25 @@ Bu dizin, **Email Marketing Suite** platformunun mobil yönetim uygulamasını i
 
 ### 📸 Uygulama Ekran Görüntüleri & Videolar
 
-| Anasayfa & Navigasyon | Abone Yönetimi |
-| :---: | :---: |
-| <img src="../docs/mobile/AnasayfaMobil.mp4" width="300" /> | <img src="../docs/mobile/Aboneler.jpeg" width="300" /> |
-| **Tam Performanslı Dashboard** | **Native Swipe & Liste Deneyimi** |
+| Anasayfa & Navigasyon | Menü Navigasyon | Mobil Abone Yönetimi |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
-| Yeni Gönderim (Kampanya) | Hazır Şablonlar |
-| :---: | :---: |
-| <img src="../docs/mobile/GonderimMobil.jpeg" width="300" /> | <img src="../docs/mobile/SablonlarimMobil.jpeg" width="300" /> |
-| **Hızlı Gönderim Akışı** | **Şablon Görüntüleme & Seçimi** |
+| Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
 
-| Raporlar & Analizler | Sistem Bildirimleri |
-| :---: | :---: |
-| <img src="../docs/mobile/RaporlarMobil.jpeg" width="300" /> | <img src="../docs/mobile/BildirimlerMobil.jpeg" width="300" /> |
-| **Detaylı Analizler** | **Uygulama İçi Bildirimler** |
+| Aktivite Günlüğü | Sistem Bildirimleri | Sistem Tanımları |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
 
-| Kullanıcı Profili | Aktivite Günlüğü |
-| :---: | :---: |
-| <img src="../docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="../docs/mobile/AktiviteGunluguMobil.jpeg" width="300" /> |
-| **Detaylı Profil Yönetimi** | **Kullanıcı İşlem Geçmişi Takibi** |
+| Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
 
-| Güvenli Giriş Ekranı | Şifre Sıfırlama |
-| :---: | :---: |
-| <img src="../docs/mobile/GirisMobil.jpeg" width="300" /> | <img src="../docs/mobile/SifremiUnuttumMobil.jpeg" width="300" /> |
-| **Modern ve Güvenli Tasarım** | **Akıcı Parola Yenileme Akışı** |
+| Şifremi Unuttum | Kullanıcı Yönetimi | Profil Bilgilerim |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="../uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
 
 ---
 

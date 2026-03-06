@@ -17,13 +17,17 @@ Kampanya yöneticilerinin, şirket içi personelin ve admin yetkisine sahip kull
 
 ### 📸 Ekran Görüntüleri & Videolar
 
-| Anasayfa Dashboard | Raporlar Ekranı |
-| :---: | :---: |
-| <img src="../docs/web/Anasayfa.mp4" width="400" /> | <img src="../docs/web/Raporlar.mp4" width="400" /> |
-
-| Abone Yönetimi | Sistem Tanımları | Şifre Yenileme |
+| Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <img src="../docs/web/Aboneler.mp4" width="280" /> | <img src="../docs/web/TanimSayfasi.png" width="280" /> | <img src="../docs/web/SifremiUnuttum.png" width="280" /> |
+| <img src="../uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" /> | <img src="../uygulamadan_goruntuler/web/Aboneler.mp4" width="280" /> | <img src="../uygulamadan_goruntuler/web/Raporlar.mp4" width="280" /> |
+
+| Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <img src="../uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" /> | <img src="../uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+
+| Kullanıcı Profili | Aktivite Günlüğü | Şifre Yenileme |
+| :---: | :---: | :---: |
+| <img src="../uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="../uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="../uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> |
 
 ---
 

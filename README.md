@@ -22,58 +22,49 @@
 
 *Aşağıdaki görseller uygulamanın canlı sisteminden alınmış gerçek Web Paneli ekranlarıdır.*
 
-| Web Paneli Anasayfa | Abone Yönetimi |
-| :---: | :---: |
-| <img src="docs/web/Anasayfa.mp4" width="400" /> | <img src="docs/web/Aboneler.mp4" width="400" /> |
-| **Gelişmiş Dashboard & İstatistikler** | **Abone Yönetimi & Excel Aktarımı** |
-
-| Raporlama Ekranı | Sistem Tanımları |
-| :---: | :---: |
-| <img src="docs/web/Raporlar.mp4" width="400" /> | <img src="docs/web/TanimSayfasi.png" width="400" /> |
-| **Detaylı Bounce & Aktivite Geçmişi** | **Sunucu ve SMTP Tanımlamaları** |
-
-| Kullanıcı Profili | Aktivite Geçmişi |
-| :---: | :---: |
-| <img src="docs/web/ProfilBilgilerim.png" width="400" /> | <img src="docs/web/KullaniciAktiviteGecmisi.png" width="400" /> |
-| **Gelişmiş Profil & Şifre Yönetimi** | **Kullanıcı İşlem Logları (Admin)** |
-
-| Hazır Şablonlar | Bildirim Geçmişi |
-| :---: | :---: |
-| <img src="docs/web/Sablonlar.png" width="400" /> | <img src="docs/web/BildirimGecmisi.mp4" width="400" /> |
-| **Özelleştirilebilir E-Posta Şablonları** | **Gerçek Zamanlı Sistem Bildirimleri** |
-
-| Giriş & Kayıt Ekranları | Admin Paneli Kullanıcıları | Şifre Yenileme |
+| Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <img src="docs/web/GirisYap.png" width="280" /> | <img src="docs/web/AdminPaneli.png" width="280" /> | <img src="docs/web/SifremiUnuttum.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" /> | <img src="uygulamadan_goruntuler/web/Aboneler.mp4" width="280" /> | <img src="uygulamadan_goruntuler/web/Raporlar.mp4" width="280" /> |
 
-<br/>
+| Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <img src="uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" /> | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+
+| Kullanıcı Profili | Aktivite Günlüğü | Klasör Yapısı |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/web/ProfilBilgilerim.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KullaniciAktiviteGecmisi.png" width="280" /> | <img src="uygulamadan_goruntuler/web/Klasorler.png" width="280" /> |
+
+| Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/web/GirisYap.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KayitOlAdmin.png" width="280" /> | <img src="uygulamadan_goruntuler/web/KayitOLKullanici.png" width="280" /> |
+
+| Şifremi Unuttum | Tanıtım Sayfası | Admin Kullanıcı Listesi |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/web/SifremiUnuttum.png" width="280" /> | <img src="uygulamadan_goruntuler/web/GirisOncesiAnasayfa.png" width="280" /> | <img src="uygulamadan_goruntuler/web/AdminPaneli.png" width="280" /> |
+
+---
 
 *Aşağıdaki görseller uygulamanın React Native (Expo) ile geliştirilmiş mobil sürümünden alınmıştır.*
 
-| Mobil Anasayfa & Navigasyon | Mobil Abone Yönetimi |
-| :---: | :---: |
-| <img src="docs/mobile/AnasayfaMobil.mp4" width="300" /> | <img src="docs/mobile/Aboneler.jpeg" width="300" /> |
-| **Tam Performanslı Dashboard** | **Native Swipe & Liste Deneyimi** |
+| Mobil Anasayfa | Menü Navigasyon | Mobil Abone Yönetimi |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" /> | <img src="uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" /> | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
-| Mobil Yeni Gönderim (Kampanya) | Hazır Şablonlar |
-| :---: | :---: |
-| <img src="docs/mobile/GonderimMobil.jpeg" width="300" /> | <img src="docs/mobile/SablonlarimMobil.jpeg" width="300" /> |
-| **Mobil Arayüzden Hızlı Gönderim** | **Şablon Görüntüleme & Seçimi** |
+| Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/mobile/GonderimMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/SablonlarimMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/RaporlarMobil.jpeg" width="220" /> |
 
-| Raporlar & Analizler | Sistem Bildirimleri |
-| :---: | :---: |
-| <img src="docs/mobile/RaporlarMobil.jpeg" width="300" /> | <img src="docs/mobile/BildirimlerMobil.jpeg" width="300" /> |
-| **Detaylı Gönderim Analizleri** | **Uygulama İçi Bildirimler** |
+| Aktivite Günlüğü | Sistem Bildirimleri | Sistem Tanımları |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/mobile/AktiviteGunluguMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/BildirimlerMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/TanimSayfasiMobil.jpeg" width="220" /> |
 
-| Kullanıcı Profili | Mobil Aktivite Günlüğü |
-| :---: | :---: |
-| <img src="docs/mobile/ProfilBilgilerimMobil.jpeg" width="300" /> | <img src="docs/mobile/AktiviteGunluguMobil.jpeg" width="300" /> |
-| **Detaylı Profil Yönetimi** | **Kullanıcı İşlem Geçmişi Takibi** |
+| Giriş Ekranı | Kayıt Ol (Admin) | Kayıt Ol (Kullanıcı) |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/mobile/GirisMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/KayitOlAdminMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/KayitOlKullaniciMobil.jpeg" width="220" /> |
 
-| Güvenli Giriş Ekranı | Hızlı Kayıt & Parola Sıfırlama |
-| :---: | :---: |
-| <img src="docs/mobile/GirisMobil.jpeg" width="300" /> | <img src="docs/mobile/SifremiUnuttumMobil.jpeg" width="300" /> |
-| **Modern ve Güvenli Tasarım** | **Akıcı Kullanıcı Deneyimi** |
+| Şifremi Unuttum | Kullanıcı Yönetimi | Profil Bilgilerim |
+| :---: | :---: | :---: |
+| <img src="uygulamadan_goruntuler/mobile/SifremiUnuttumMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/AdminPaneliMobil.jpeg" width="220" /> | <img src="uygulamadan_goruntuler/mobile/ProfilBilgilerimMobil.jpeg" width="220" /> |
 
 <br/>
   <img src="https://img.shields.io/badge/Entity_Framework_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="EF Core" />
@@ -243,3 +234,4 @@ ASP.NET Core MVC ile geliştirilen web paneli; büyük ekranlarda detaylı grafi
 ---
 
 *© Bu proje, yüksek kod kalitesi (Clean Code, SOLID prensipleri) ve yazılım mühendisliği standartları gözetilerek geliştirilmiştir.*
+ 
