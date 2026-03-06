@@ -17,7 +17,7 @@ Bu dizin, **Email Marketing Suite** platformunun mobil yönetim uygulamasını i
 
 | Anasayfa & Navigasyon | Menü Navigasyon | Mobil Abone Yönetimi |
 | :---: | :---: | :---: |
-| ![Mobil Anasayfa](../uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4) | ![Menü](../uygulamadan_goruntuler/mobile/MenuMobil.mp4) | <img src="../uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
+| <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" controls playsinline></video> | <img src="../uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
 | Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
 | :---: | :---: | :---: |
