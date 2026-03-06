@@ -21,6 +21,7 @@ public class TemplateManager
         
         _context.Templates.Add(template);
         _context.SaveChanges();
+        LogManager.LogAction(template.UserId, "Yeni Şablon Eklendi", $"'{template.Title}' adlı yeni mail şablonu oluşturuldu.");
         return "OK";
     }
 
@@ -41,6 +42,7 @@ public class TemplateManager
         // CreatedDate ve IsActive alanlarını ellemiyoruz, onlar sabit kalmalı.
 
         _context.SaveChanges();
+        LogManager.LogAction(template.UserId, "Şablon Güncellendi", $"'{template.Title}' adlı mail şablonu güncellendi.");
         return "OK";
     }
 

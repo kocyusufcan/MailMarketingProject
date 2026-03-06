@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailMarketing.Business", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailMarketing.WebUI", "MailMarketing.WebUI\MailMarketing.WebUI.csproj", "{766C7B87-DC5F-47F4-A303-AA2D153C9ACB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailMarketing.API", "MailMarketing.API\MailMarketing.API.csproj", "{FB2AD34A-EF13-4F8F-B7A1-72765417A73D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{766C7B87-DC5F-47F4-A303-AA2D153C9ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{766C7B87-DC5F-47F4-A303-AA2D153C9ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{766C7B87-DC5F-47F4-A303-AA2D153C9ACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB2AD34A-EF13-4F8F-B7A1-72765417A73D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB2AD34A-EF13-4F8F-B7A1-72765417A73D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB2AD34A-EF13-4F8F-B7A1-72765417A73D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB2AD34A-EF13-4F8F-B7A1-72765417A73D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

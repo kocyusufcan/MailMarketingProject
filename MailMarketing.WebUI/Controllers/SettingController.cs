@@ -67,7 +67,7 @@ public class SettingController : Controller
                     model.Password = SecurityHelper.Encrypt(model.Password);
 
                 db.Settings.Add(model);
-                TempData["Message"] = "SMTP settings created successfully.";
+                TempData["Message"] = "SMTP ayarları başarıyla kaydedildi.";
             }
             else
             {
@@ -84,7 +84,7 @@ public class SettingController : Controller
                     existingSetting.Password = SecurityHelper.Encrypt(model.Password);
                 }
 
-                TempData["Message"] = "SMTP settings updated successfully.";
+                TempData["Message"] = "SMTP ayarları başarıyla güncellendi.";
             }
 
             db.SaveChanges();

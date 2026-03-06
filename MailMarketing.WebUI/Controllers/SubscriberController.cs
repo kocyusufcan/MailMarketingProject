@@ -132,6 +132,13 @@ public class SubscriberController : Controller
                                 .Select(g => new { GroupId = g.Key, Count = g.Count() })
                                 .ToDictionary(x => x.GroupId, x => x.Count);
 
+            if (systemGroup != null)
+            {
+                // Sistem klasörü için asıl abone sayısını kullan (aktif/pasif fark etmeksizin tümü)
+                int totalCount = db.Subscribers.Count(s => s.UserId == currentUserId);
+                groupCounts[systemGroup.Id] = totalCount;
+            }
+
             ViewBag.GroupCounts = groupCounts;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -152,10 +159,20 @@ public class SubscriberController : Controller
             var group = db.SubscriberGroups.FirstOrDefault(g => g.Id == groupId && g.UserId == currentUserId);
             if (group == null) return RedirectToAction("Groups");
 
-            var memberIds = db.SubscriberGroupMembers.Where(m => m.GroupId == groupId).Select(m => m.SubscriberId).ToList();
-
             int pageSize = 20;
-            var query = db.Subscribers.Where(s => memberIds.Contains(s.Id));
+            IQueryable<Subscriber> query;
+
+            if (group.IsSystem)
+            {
+                // Sistem klasörü ise doğrudan tüm aboneleri göster (aktif/pasif fark etmeksizin)
+                query = db.Subscribers.Where(s => s.UserId == currentUserId);
+            }
+            else
+            {
+                var memberIds = db.SubscriberGroupMembers.Where(m => m.GroupId == groupId).Select(m => m.SubscriberId).ToList();
+                query = db.Subscribers.Where(s => memberIds.Contains(s.Id));
+            }
+
             int totalRecords = query.Count();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
 

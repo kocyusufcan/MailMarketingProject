@@ -14,7 +14,7 @@ namespace MailMarketing.Business;
 
 public class BounceCheckManager
 {
-    public async Task CheckBouncesForUserAsync(User user)
+    public async Task<int> CheckBouncesForUserAsync(User user)
     {
         using (var db = new MailMarketingContext())
         {
@@ -22,7 +22,7 @@ public class BounceCheckManager
             var settings = db.Settings.FirstOrDefault(s => s.UserId == user.Id);
             
             if (settings == null || string.IsNullOrEmpty(settings.Email) || string.IsNullOrEmpty(settings.Password))
-                return;
+                return 0;
 
             try
             {
@@ -72,105 +72,143 @@ public class BounceCheckManager
                     {
                          // Hiçbiri çalışmadıysa, son hatayı fırlat veya logla
                          Console.WriteLine($"[BounceManager Hata] Kullanıcı ID: {user.Id} - Bağlantı kurulamadı. Son Hata: {lastException?.Message}");
-                         return;
+                         return 0;
                     }
 
                     // Giriş yap
                     await client.AuthenticateAsync(settings.Email, decryptedPassword);
 
-                    var inbox = client.Inbox;
-                    await inbox.OpenAsync(FolderAccess.ReadWrite);
+                    // 4. Klasörleri Tara (Inbox ve Trash)
+                    var foldersToScan = new List<IMailFolder> { client.Inbox };
+                    
+                    var trash = client.GetFolder(SpecialFolder.Trash);
+                    if (trash != null) foldersToScan.Add(trash);
 
-                    // 4. HATA MAİLLERİNİ ARA (Genişletilmiş Filtre)
-                    var timeLimit = DateTime.Now.AddDays(-1);
-                    var query = SearchQuery.DeliveredAfter(timeLimit).And(
-                        SearchQuery.SubjectContains("Notification")
-                        .Or(SearchQuery.SubjectContains("Failure"))
-                        .Or(SearchQuery.SubjectContains("Undeliverable"))
-                        .Or(SearchQuery.SubjectContains("İletilemedi"))
-                        .Or(SearchQuery.SubjectContains("Hata"))
-                        .Or(SearchQuery.FromContains("postmaster"))
-                        .Or(SearchQuery.FromContains("mailer-daemon"))
-                    );
-
-                    var uids = await inbox.SearchAsync(query);
-
-                    if (uids.Count > 0)
+                    foreach (var folder in foldersToScan)
                     {
-                        bool anyChange = false;
+                        await folder.OpenAsync(FolderAccess.ReadWrite);
 
-                        foreach (var uid in uids)
+                        // 5. HATA MAİLLERİNİ ARA (Genişletilmiş Filtre)
+                        var timeLimit = DateTime.Now.AddDays(-3); // Son 3 günü tara
+                        var query = SearchQuery.DeliveredAfter(timeLimit).And(
+                            SearchQuery.SubjectContains("Notification")
+                            .Or(SearchQuery.SubjectContains("Failure"))
+                            .Or(SearchQuery.SubjectContains("Undeliverable"))
+                            .Or(SearchQuery.SubjectContains("İletilemedi"))
+                            .Or(SearchQuery.SubjectContains("Hata"))
+                            .Or(SearchQuery.SubjectContains("Mail Delivery"))
+                            .Or(SearchQuery.SubjectContains("Returned"))
+                            .Or(SearchQuery.SubjectContains("Unreachable"))
+                            .Or(SearchQuery.FromContains("postmaster"))
+                            .Or(SearchQuery.FromContains("mailer-daemon"))
+                        );
+
+                        var uids = await folder.SearchAsync(query);
+
+                        if (uids.Count > 0)
                         {
-                            var message = await inbox.GetMessageAsync(uid);
-                            string body = message.TextBody ?? message.HtmlBody ?? "";
+                            int changedCount = 0;
 
-                            // E-posta adreslerini yakala
-                            var matches = Regex.Matches(body, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+                            // Kullanıcının tüm abonelerini bir kez çek (performans için döngü dışında)
+                            var allSubscribers = db.Subscribers.Where(s => s.UserId == user.Id).ToList();
+                            var idn = new System.Globalization.IdnMapping();
 
-                            foreach (Match match in matches)
+                            foreach (var uid in uids)
                             {
-                                string foundEmail = match.Value.ToLower().Trim();
-                                
-                                // Kendi mailimizi veya sistem maillerini atla
-                                if (foundEmail.Contains(settings.Email.ToLower()) || 
-                                    foundEmail.Contains("google.com") || 
-                                    foundEmail.Contains("microsoft.com")) continue;
-
-                                // Sadece bu kullanıcıya ait aktif aboneyi bul
-                                // s.Email != null kontrolü ekleyerek CS8602 uyarısını çözüyoruz
-                                var subscriber = db.Subscribers.FirstOrDefault(s => 
-                                s.Email != null && 
-                                s.Email.ToLower() == foundEmail && 
-                                s.UserId == user.Id && 
-                                    s.IsActive == true);
-
-                                if (subscriber != null)
+                                try
                                 {
-                                    subscriber.IsActive = false; // ABONEYİ DURDUR
+                                    var message = await folder.GetMessageAsync(uid);
+                                    string bodyText = message.TextBody ?? "";
+                                    string htmlText = message.HtmlBody ?? "";
+                                    string subject = message.Subject ?? "";
                                     
-                                    // Mail logunu güncelle
-                                    var lastLog = db.MailLogs
-                                        .Where(l => l.SubscriberId == subscriber.Id)
-                                        .OrderByDescending(l => l.Id)
-                                        .FirstOrDefault();
+                                    string fullText = (subject + " " + bodyText + " " + htmlText).ToLower();
 
-                                    if (lastLog != null) 
-                                    { 
-                                        lastLog.IsSuccess = false; 
-                                        lastLog.ErrorMessage = "İletim Hatası: Böyle bir kullanıcı bulunamadı"; 
+                                    bool matchedAnySubscriber = false;
+
+                                    foreach (var sub in allSubscribers)
+                                    {
+                                        if (string.IsNullOrEmpty(sub.Email)) continue;
+
+                                        string subEmailLower = sub.Email.ToLower().Trim();
+                                        string punycodeEmail = subEmailLower;
+
+                                        try 
+                                        {
+                                            var parts = subEmailLower.Split('@');
+                                            if (parts.Length == 2) 
+                                            {
+                                                punycodeEmail = parts[0] + "@" + idn.GetAscii(parts[1]).ToLower();
+                                            }
+                                        } 
+                                        catch { }
+
+                                        // Bounce mailinde normal halini veya punycode halini bulduk mu?
+                                        if (fullText.Contains(subEmailLower) || (punycodeEmail != subEmailLower && fullText.Contains(punycodeEmail)))
+                                        {
+                                            sub.IsActive = false; // ABONEYİ DURDUR
+                                            changedCount++;
+                                            
+                                            var lastLog = db.MailLogs
+                                                .Where(l => l.SubscriberId == sub.Id)
+                                                .OrderByDescending(l => l.Id)
+                                                .FirstOrDefault();
+
+                                            if (lastLog != null) 
+                                            { 
+                                                lastLog.IsSuccess = false; 
+                                                lastLog.ErrorMessage = "İletim Hatası: Alıcı adresi bulunamadı veya kabul edilmedi (Bounce)"; 
+                                            }
+
+                                            db.Notifications.Add(new Notification
+                                            {
+                                                Title = "İletim Hatası (Bounce)",
+                                                Message = $"{(sub.FirstName ?? "")} {(sub.LastName ?? "")} ({sub.Email}) adresine gönderilen mail geri döndü ve abone pasife alındı.",
+                                                CreatedAt = DateTime.Now,
+                                                IsRead = false,
+                                                UserId = user.Id 
+                                            });
+
+                                            matchedAnySubscriber = true;
+                                        }
                                     }
 
-                                    // Bildirim ekle
-                                    db.Notifications.Add(new Notification
+                                    // Tespit ettiğimiz bir bounce varsa hemen kaydet
+                                    if (matchedAnySubscriber)
                                     {
-                                        Title = "İletim Hatası",
-                                        // FirstName ve LastName null ise boşluk bırak (?? "")
-                                        Message = $"{(subscriber.FirstName ?? "")} {(subscriber.LastName ?? "")} ({subscriber.Email}) maili geri döndü ve pasife alındı.",
-                                        CreatedAt = DateTime.Now,
-                                        IsRead = false,
-                                        UserId = user.Id 
-                                    });
-
-                                    anyChange = true;
-                                    Console.WriteLine($"[BOUNCE] Yakalandı: {foundEmail}");
+                                        await db.SaveChangesAsync();
+                                        
+                                        try
+                                        {
+                                            await folder.AddFlagsAsync(uid, MessageFlags.Deleted, true);
+                                        }
+                                        catch (Exception flagEx)
+                                        {
+                                            Console.WriteLine($"[BounceManager] Mesaj işaretlenirken hata (önemsiz): {flagEx.Message}");
+                                        }
+                                    }
                                 }
-                                // ... (Alt kısımlar aynı)
+                                catch (Exception uidEx)
+                                {
+                                    // Tek bir bounce maili okunamazsa diğerlerine devam et
+                                    Console.WriteLine($"[BounceManager] Bounce maili işlenirken hata (devam ediliyor): {uidEx.Message}");
+                                }
                             }
-                            // İşlenen maili silinmek üzere işaretle (Gmail'de temiz kalsın)
-                            await inbox.AddFlagsAsync(uid, MessageFlags.Deleted, true);
+
+                            // Son olarak expunge yap (silinmiş mesajları temizle)
+                            try { await folder.ExpungeAsync(); } catch { }
+                            return changedCount;
                         }
-                        
-                        if (anyChange) await db.SaveChangesAsync();
-                        // Silme işlemini onayla
-                        await inbox.ExpungeAsync();
                     }
                     await client.DisconnectAsync(true);
+                    return 0;
                 }
             }
             catch (Exception ex)
             {
                 // Bounce kontrolü kritik bir akış olmadığı için sadece konsola yazıyoruz
                 Console.WriteLine($"[BounceManager Hata] Kullanıcı ID: {user.Id} - Hata: {ex.ToString()}");
+                return 0;
             }
         }
     }

@@ -5,7 +5,13 @@ namespace MailMarketing.DataAccess;
 
 public class MailMarketingContext : DbContext
 {
-    // Veritabanı tablolarımızı EF Core'a tanıtıyoruz
+    // Parametresiz constructor - doğrudan `new MailMarketingContext()` ile çalışma için
+    public MailMarketingContext() { }
+
+    // DI üzerinden inject edildiğinde kullanılan constructor
+    public MailMarketingContext(DbContextOptions<MailMarketingContext> options) : base(options) { }
+
+    // Veritabanı tablolarımız
     public DbSet<User> Users { get; set; }
     public DbSet<Subscriber> Subscribers { get; set; }
     public DbSet<Template> Templates { get; set; }
@@ -19,7 +25,11 @@ public class MailMarketingContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // SSMS'teki Server Name'in ve oluşturduğumuz DB adı
-        optionsBuilder.UseSqlServer("Server=YUSUFCAN-PC\\SQLEXPRESS02;Database=MailMarketingDB;Trusted_Connection=True;TrustServerCertificate=True;");
+        // Yalnızca DI üzerinden options gelmemişse (CLI tools için)
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(
+                "Server=YUSUFCAN-PC\\SQLEXPRESS02;Database=MailMarketingDB;Trusted_Connection=True;TrustServerCertificate=True;");
+        }
     }
 }

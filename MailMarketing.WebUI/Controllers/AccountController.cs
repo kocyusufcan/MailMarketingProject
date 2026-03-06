@@ -226,7 +226,7 @@ public class AccountController : Controller
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
-            LogManager.LogAction(user.Id, "Sisteme Giriş", "Kullanıcı başarıyla oturum açtı.");
+            LogManager.LogAction(user.Id, "Oturum Açıldı", "Sisteme giriş yapıldı (Web Sitesi).");
 
             return RedirectToAction("Index", "Home");
         }
@@ -364,7 +364,7 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(!string.IsNullOrEmpty(sid)) LogManager.LogAction(int.Parse(sid), "Çıkış Yapıldı", "Kullanıcı oturumu kapattı.");
+        if(!string.IsNullOrEmpty(sid)) LogManager.LogAction(int.Parse(sid), "Oturum Kapatıldı", "Sistemden güvenli çıkış yapıldı (Web Sitesi).");
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home"); 

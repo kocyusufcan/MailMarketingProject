@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="5.8.5" />
+    <PackageReference Include="Mammoth" Version="1.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MailMarketing.Entity\MailMarketing.Entity.csproj" />
+    <ProjectReference Include="..\MailMarketing.DataAccess\MailMarketing.DataAccess.csproj" />
+    <ProjectReference Include="..\MailMarketing.Business\MailMarketing.Business.csproj" />
+  </ItemGroup>
+
+</Project>

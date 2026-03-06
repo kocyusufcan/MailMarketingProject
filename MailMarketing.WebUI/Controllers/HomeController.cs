@@ -419,7 +419,7 @@ public class HomeController : Controller
 
                 if (lastNotification != null && (DateTime.Now - lastNotification.CreatedAt).TotalSeconds < 5)
                 {
-                    return Ok("Zaten işlenmiş.");
+                    return Json(new { status = "already_processed" });
                 }
 
                 var checker = new BounceCheckManager();
@@ -440,9 +440,10 @@ public class HomeController : Controller
                 
                 db.SaveChanges();
                 LogManager.LogAction(currentUserId, "Bounce Kontrolü", "Gelmeyen mailler kontrol edildi.");
+                
+                return Json(new { status = "success", count = duzeltilecekLoglar.Count });
             }
         }
-        return Ok(); 
     }
 
     // --- 4. BİLDİRİM YÖNETİMİ ---

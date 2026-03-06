@@ -34,6 +34,7 @@ public class SubscriberManager
         {
             _context.Entry(subscriber).State = EntityState.Modified;
             _context.SaveChanges();
+            LogManager.LogAction(subscriber.UserId, "Abone Güncellendi", $"'{subscriber.Email}' adlı abonenin bilgileri güncellendi.");
             return "OK";
         }
         catch (Exception ex)
@@ -93,6 +94,7 @@ public class SubscriberManager
                     _context.SaveChanges();
                 }
             }
+            LogManager.LogAction(subscriber.UserId, "Yeni Abone Eklendi", $"'{subscriber.Email}' adlı yeni abone sisteme kaydedildi.");
             return "OK";
         }
         catch (Exception)
@@ -112,7 +114,7 @@ public class SubscriberManager
             if (subscriber == null) return "Silinecek abone bulunamadı!";
             _context.Subscribers.Remove(subscriber);
             _context.SaveChanges(); 
-            
+            LogManager.LogAction(subscriber.UserId, "Abone Silindi", $"'{subscriber.Email}' adlı abone sistemden silindi.");
             return "OK";
         }
         catch (Exception ex)

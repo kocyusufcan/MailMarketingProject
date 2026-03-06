@@ -75,20 +75,37 @@
     @* 📱 Üst Başlık ve Hızlı İşlemler *@
     <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h1 class="page-title mb-1">Gönderim Raporları</h1>
+            @if (ViewBag.TargetUserId != null)
+            {
+                <h1 class="page-title mb-1">
+                    <a href="/User/Index" class="btn btn-sm btn-outline-secondary me-2" title="Geri Dön" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; line-height: 30px; text-align: center;"><i class="fas fa-arrow-left"></i></a>
+                    @(ViewBag.TargetUserName ?? "Kullanıcı") Raporları
+                </h1>
+            }
+            else
+            {
+                <h1 class="page-title mb-1">Gönderim Raporları</h1>
+            }
             <p class="text-muted small mb-0">Toplam <b>@ViewBag.TotalRecords</b> adet kayıt listeleniyor.</p>
         </div>
         <div class="d-flex gap-2">
-            <button type="button" id="btnBulkDelete" class="btn-saas btn-saas-bulk shadow-sm" style="display:none;" onclick="confirmBulkDelete()">
-                <i class="fas fa-trash-alt me-2"></i> Seçilenleri Sil (<span id="selectedCount">0</span>)
-            </button>
+            @if (ViewBag.TargetUserId == null)
+            {
+                <button type="button" id="btnBulkDelete" class="btn-saas btn-saas-bulk shadow-sm" style="display:none;" onclick="confirmBulkDelete()">
+                    <i class="fas fa-trash-alt me-2"></i> Seçilenleri Sil (<span id="selectedCount">0</span>)
+                </button>
+            }
 
             <button type="button" class="btn-saas btn-saas-secondary shadow-sm" onclick="exportToExcel()">
                 <i class="fas fa-file-excel me-2 text-success"></i> Excel'e Aktar
             </button>
-            <button class="btn-saas btn-saas-danger shadow-sm" onclick="confirmClearLogs()">
-                <i class="fas fa-broom me-2"></i> Geçmişi Temizle
-            </button>
+            
+            @if (ViewBag.TargetUserId == null)
+            {
+                <button class="btn-saas btn-saas-danger shadow-sm" onclick="confirmClearLogs()">
+                    <i class="fas fa-broom me-2"></i> Geçmişi Temizle
+                </button>
+            }
         </div>
     </div>
 
@@ -96,6 +113,10 @@
     <div class="web-card">
         <div class="filter-group">
             <form action="/MailLog/Index" method="get" class="row g-3 align-items-end" id="filterForm">
+                @if (ViewBag.TargetUserId != null)
+                {
+                    <input type="hidden" name="userId" value="@ViewBag.TargetUserId" />
+                }
                 <div class="col-lg-3 col-md-6">
                     <label class="label-custom">Abone Ara</label>
                     <input type="text" name="search" class="input-custom" placeholder="İsim veya mail..." value="@ViewBag.Search">
@@ -131,6 +152,28 @@
             </form>
         </div>
     </div>
+
+    @* ⚡ Kısmi Görünüm / Bilgi ve Bounce Start *@
+    @if (ViewBag.TargetUserId == null)
+    {
+        <div class="web-card mb-4" style="background: linear-gradient(to right, #ffffff, #f8fafc); border-left: 4px solid #6366f1;">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box" style="width: 50px; height: 50px; background: #eef2ff; border-radius: 12px; border: 1px solid #c7d2fe; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 10px rgba(99,102,241,0.15);">
+                        📬
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.1rem;">Bounce (Hata) Kontrolü</h5>
+                        <p class="text-muted mb-0" style="font-size: 0.85rem;">"Başarılı" görünen ancak sunucu tarafından reddedilen (bounce) e-postaları kontrol et.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-saas btn-saas-primary shadow-sm" id="btnCheckBounces" onclick="checkBounces()" style="white-space: nowrap;">
+                    <i class="fas fa-sync-alt me-2" id="bounceSpinnerIcon"></i> Şimdi Tara
+                </button>
+            </div>
+        </div>
+    }
+    @* ⚡ Kısmi Görünüm / Bilgi ve Bounce End *@
 
     @* 📄 Rapor Listesi *@
     <form id="bulkDeleteForm" action="/MailLog/BulkDelete" method="post">
@@ -181,7 +224,14 @@
                                         }
                                     </td>
                                     <td class="text-end">
-                                        <button type="button" class="btn btn-link text-danger p-0 delete-btn" onclick="confirmDeleteLog(@log.Id)"><i class="fas fa-trash-alt"></i></button>
+                                        @if (ViewBag.TargetUserId == null)
+                                        {
+                                            <button type="button" class="btn btn-link text-danger p-0 delete-btn" onclick="confirmDeleteLog(@log.Id)"><i class="fas fa-trash-alt"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted" title="Silme yetkisi yok"><i class="fas fa-lock"></i></span>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -209,7 +259,7 @@
                 <li class="page-item @(cur == 1 ? "disabled" : "")">
                     <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
                        style="width: 40px; height: 40px;"
-                       href="@Url.Action("Index", new { page = cur - 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">
+                       href="@Url.Action("Index", new { page = cur - 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate, userId = ViewBag.TargetUserId })">
                         <i class="fas fa-chevron-left small"></i>
                     </a>
                 </li>
@@ -217,7 +267,7 @@
                      @if (i == 1 || i == total || (i >= cur - gap && i <= cur + gap)) {
                         <li class="page-item @(i == cur ? "active" : "")">
                             <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold @(i == cur ? "bg-primary text-white" : "text-dark bg-white")"
-                               style="width: 40px; height: 40px;" href="@Url.Action("Index", new { page = i, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">@i</a>
+                               style="width: 40px; height: 40px;" href="@Url.Action("Index", new { page = i, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate, userId = ViewBag.TargetUserId })">@i</a>
                         </li>
                      } else if (i == cur - gap - 1 || i == cur + gap + 1) {
                         <li class="page-item disabled"><span class="page-link border-0 bg-transparent text-muted">...</span></li>
@@ -226,7 +276,7 @@
                 <li class="page-item @(cur == total ? "disabled" : "")">
                     <a class="page-link border-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
                        style="width: 40px; height: 40px;"
-                       href="@Url.Action("Index", new { page = cur + 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })">
+                       href="@Url.Action("Index", new { page = cur + 1, search = ViewBag.Search, templateId = ViewBag.SelectedTemplateId, status = ViewBag.CurrentStatus, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate, userId = ViewBag.TargetUserId })">
                         <i class="fas fa-chevron-right small"></i>
                     </a>
                 </li>
@@ -266,7 +316,8 @@
                 } else {
                     // 2️⃣ İNCELEME MODU: Detay modalını aç
                     const logId = checkbox.val();
-                    $.get('/MailLog/GetLogDetail/' + logId, function(data) {
+                    const targetUserIdParams = '@ViewBag.TargetUserId' ? '?userId=@ViewBag.TargetUserId' : '';
+                    $.get('/MailLog/GetLogDetail/' + logId + targetUserIdParams, function(data) {
                         $('#logDetailBody').html(data);
                         new bootstrap.Modal(document.getElementById('logDetailModal')).show();
                     });
@@ -302,7 +353,8 @@
         }
 
         function exportToExcel() {
-            window.location.href = `/MailLog/ExportToExcel?search=${encodeURIComponent($('input[name="search"]').val())}&templateId=${$('select[name="templateId"]').val()}&status=${$('select[name="status"]').val()}&startDate=${$('input[name="startDate"]').val()}&endDate=${$('input[name="endDate"]').val()}`;
+            var userIdParam = '@ViewBag.TargetUserId' ? '&userId=@ViewBag.TargetUserId' : '';
+            window.location.href = `/MailLog/ExportToExcel?search=${encodeURIComponent($('input[name="search"]').val())}&templateId=${$('select[name="templateId"]').val()}&status=${$('select[name="status"]').val()}&startDate=${$('input[name="startDate"]').val()}&endDate=${$('input[name="endDate"]').val()}${userIdParam}`;
         }
 
         function confirmClearLogs() {
@@ -313,6 +365,43 @@
         function confirmDeleteLog(id) {
             Swal.fire({ title: 'Silinsin mi?', text: "Bu kayıt silinecek.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sil' })
             .then((r) => { if(r.isConfirmed) location.href = '/MailLog/Delete/' + id; });
+        }
+
+        function checkBounces() {
+            const btn = document.getElementById('btnCheckBounces');
+            
+            // Buton durumunu ayarla
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2" id="bounceSpinnerIcon"></i> Taranıyor...';
+
+            $.post('/Home/CheckMyBounces')
+                .done(function (response) {
+                    if (response === "Zaten işlenmiş." || response.status === "already_processed") {
+                        Swal.fire({ title: 'Bilgi', text: 'Zaten yakın zamanda tarama yapıldı.', icon: 'info' });
+                    } else if (response.status === "success" || response.count !== undefined) {
+                        const count = response.count || 0;
+                        const msg = count > 0 
+                            ? `Bounce taraması tamamlandı.<br><br><b class="text-danger">${count} adet</b> gönderim sistemde hatalı olarak güncellendi ve raporlara yansıdı.` 
+                            : `Bounce taraması tamamlandı.<br><br>Yeni bir hatalı (bounce) gönderim <b>bulunamadı</b>.`;
+                            
+                        Swal.fire({ title: 'İşlem Başarılı', html: msg, icon: 'success', timer: 4500, showConfirmButton: true, confirmButtonText: 'Tamam', confirmButtonColor: '#6366f1' })
+                            .then(() => {
+                                window.location.reload();
+                            });
+                    } else {
+                        Swal.fire({ title: 'İşlem Başarılı', text: 'Bounce taraması tamamlandı, sonuçlar güncelleniyor...', icon: 'success', timer: 2000, showConfirmButton: false })
+                            .then(() => {
+                                window.location.reload();
+                            });
+                    }
+                })
+                .fail(function () {
+                    Swal.fire({ title: 'Hata', text: 'Tarama sırasında sunucu ile iletişim koptu.', icon: 'error' });
+                })
+                .always(function () {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sync-alt me-2" id="bounceSpinnerIcon"></i> Şimdi Tara';
+                });
         }
     </script>
 }

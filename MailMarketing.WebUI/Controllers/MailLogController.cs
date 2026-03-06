@@ -17,15 +17,31 @@ namespace MailMarketing.WebUI.Controllers;
 public class MailLogController : Controller
 {
     // 1. LİSTELEME VE GELİŞMİŞ FİLTRELEME
-    public IActionResult Index(string search, string status = "all", int? templateId = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1)
+    public IActionResult Index(string search, string status = "all", int? templateId = null, DateTime? startDate = null, DateTime? endDate = null, int? userId = null, int page = 1)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentUserId = int.Parse(sid!);
 
+        int queryUserId = currentUserId;
+        if (userId.HasValue && User.IsInRole("Admin"))
+        {
+            queryUserId = userId.Value;
+        }
+
         using (var db = new MailMarketingContext())
         {
+            // Kullanıcı adını UI'da göstermek için (Admin başka kullanıcının raporunu görüntülüyorsa)
+            if (queryUserId != currentUserId)
+            {
+                var targetUser = db.Users.Find(queryUserId);
+                if (targetUser != null)
+                {
+                    ViewBag.TargetUserName = !string.IsNullOrEmpty(targetUser.DisplayName) ? targetUser.DisplayName : $"{targetUser.FirstName} {targetUser.LastName}";
+                }
+            }
+
             ViewBag.Templates = db.Templates
-                                  .Where(t => t.UserId == currentUserId)
+                                  .Where(t => t.UserId == queryUserId)
                                   .OrderBy(t => t.Title)
                                   .AsNoTracking()
                                   .ToList();
@@ -33,7 +49,7 @@ public class MailLogController : Controller
             var query = db.MailLogs
                            .Include(l => l.Template)
                            .Include(l => l.Subscriber)
-                           .Where(l => l.Template != null && l.Template.UserId == currentUserId)
+                           .Where(l => l.Template != null && l.Template.UserId == queryUserId)
                            .AsQueryable();
 
 #pragma warning disable CS8602 
@@ -79,23 +95,30 @@ public class MailLogController : Controller
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
+            ViewBag.TargetUserId = userId; // Sayfalandırma ve export gibi işlemler için
 
             return View(logs);
         }
     }
 
     [HttpGet]
-    public IActionResult GetLogDetail(int id)
+    public IActionResult GetLogDetail(int id, int? userId = null)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentUserId = int.Parse(sid!);
+
+        int queryUserId = currentUserId;
+        if (userId.HasValue && User.IsInRole("Admin"))
+        {
+            queryUserId = userId.Value;
+        }
 
         using (var db = new MailMarketingContext())
         {
             var log = db.MailLogs
                         .Include(l => l.Subscriber)
                         .Include(l => l.Template)
-                        .FirstOrDefault(l => l.Id == id && l.Template != null && l.Template.UserId == currentUserId);
+                        .FirstOrDefault(l => l.Id == id && l.Template != null && l.Template.UserId == queryUserId);
 
             if (log == null) return NotFound();
 
@@ -104,17 +127,23 @@ public class MailLogController : Controller
     }
 
     // 2. EXCEL AKTARIM (GÜNCELLENDİ: Şablon İsmi Loglanıyor)
-    public IActionResult ExportToExcel(string search, string status, int? templateId, DateTime? startDate, DateTime? endDate)
+    public IActionResult ExportToExcel(string search, string status, int? templateId, DateTime? startDate, DateTime? endDate, int? userId = null)
     {
         var sid = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentUserId = int.Parse(sid!);
+
+        int queryUserId = currentUserId;
+        if (userId.HasValue && User.IsInRole("Admin"))
+        {
+            queryUserId = userId.Value;
+        }
 
         using (var db = new MailMarketingContext())
         {
             var query = db.MailLogs
                            .Include(l => l.Template)
                            .Include(l => l.Subscriber)
-                           .Where(l => l.Template != null && l.Template.UserId == currentUserId)
+                           .Where(l => l.Template != null && l.Template.UserId == queryUserId)
                            .AsQueryable();
 
 #pragma warning disable CS8602

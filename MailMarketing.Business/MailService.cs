@@ -114,7 +114,8 @@ public class MailService
                         catch (Exception ex)
                         {
                             log.IsSuccess = false;
-                            log.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                            string technicalError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                            log.ErrorMessage = MailErrorHelper.GetFriendlyMessage(technicalError);
                         }
                         db.MailLogs.Add(log);
                     }
@@ -126,7 +127,25 @@ public class MailService
                     _ = checker.CheckBouncesForUserAsync(senderUser);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                // SMTP Bağlantı hatası veya genel bir hata olduğunda tüm aboneler için hata logu oluştur
+                string technicalError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                string friendlyError = MailErrorHelper.GetFriendlyMessage(technicalError);
+
+                foreach (var sub in subscribers)
+                {
+                    var log = new MailLog { 
+                        SubscriberId = sub.Id, 
+                        TemplateId = template.Id, 
+                        SentDate = DateTime.Now,
+                        IsSuccess = false,
+                        ErrorMessage = "Bağlantı Hatası: " + friendlyError
+                    };
+                    db.MailLogs.Add(log);
+                }
+                db.SaveChanges();
+            }
         }
     }
 
