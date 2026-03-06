@@ -1,5 +1,15 @@
 <div align="center">
 
+
+
+
+
+
+
+
+
+
+
 <h1>📬 Email Marketing Suite</h1>
 <h3>Kurumsal E-Posta Pazarlama & Yönetim Platformu</h3>
 
@@ -24,11 +34,11 @@
 
 | Anasayfa Dashboard | Abone Yönetimi | Raporlama Ekranı |
 | :---: | :---: | :---: |
-| <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Anasayfa.mp4" width="280" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Aboneler.mp4" width="280" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/Raporlar.mp4" width="280" controls playsinline></video> |
+| <video src="https://github.com/user-attachments/assets/0d24c670-8830-4b7e-a350-e6f949953522" width="280" controls playsinline></video> | <video src="https://github.com/user-attachments/assets/f717e805-1f82-4590-9092-cf5e0feaea23" width="280" controls playsinline></video> | <video src="https://github.com/user-attachments/assets/1ffb630b-7130-402c-a3be-8dd1e9ce705c" width="280" controls playsinline></video> |
 
 | Şablon Yönetimi | Bildirim Geçmişi | Sistem Tanımları |
 | :---: | :---: | :---: |
-| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/web/BildirimGecmisi.mp4" width="280" controls playsinline></video> | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
+| <img src="uygulamadan_goruntuler/web/Sablonlar.png" width="280" /> | <video src="https://github.com/user-attachments/assets/2fdf7b8e-4c86-42ea-9159-5ed953988161" width="280" controls playsinline></video> | <img src="uygulamadan_goruntuler/web/TanimSayfasi.png" width="280" /> |
 
 | Kullanıcı Profili | Aktivite Günlüğü | Klasör Yapısı |
 | :---: | :---: | :---: |
@@ -48,7 +58,7 @@
 
 | Mobil Anasayfa | Menü Navigasyon | Mobil Abone Yönetimi |
 | :---: | :---: | :---: |
-| <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/mobile/AnasayfaMobil.mp4" width="220" controls playsinline></video> | <video src="https://github.com/kocyusufcan/MailMarketingProject/raw/main/uygulamadan_goruntuler/mobile/MenuMobil.mp4" width="220" controls playsinline></video> | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
+| <video src="https://github.com/user-attachments/assets/abb75e7e-f64b-4f4e-a83a-e5c050c7ea12" width="220" controls playsinline></video> | <video src="https://github.com/user-attachments/assets/4bd8f6f1-8b23-42fc-a148-ba58f2609545" width="220" controls playsinline></video> | <img src="uygulamadan_goruntuler/mobile/Aboneler.jpeg" width="220" /> |
 
 | Yeni Gönderim | Şablonlarım | Raporlar & Analiz |
 | :---: | :---: | :---: |
